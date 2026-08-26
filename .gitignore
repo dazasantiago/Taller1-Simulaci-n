@@ -1,0 +1,43 @@
+# === Entornos virtuales ===
+venv/
+.venv/
+env/
+ENV/
+
+# === Bytecode / caches de Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# === Jupyter ===
+.ipynb_checkpoints/
+
+# === Salidas generadas (gráficos, histogramas, exportes) ===
+outputs/*
+!outputs/.gitkeep
+
+# === Datos generados/temporales (no confundir con /data/seeds versionado) ===
+*.log
+
+# === Empaquetado / build ===
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# === Configuración local / secretos ===
+.env
+.env.*
+
+# === Editores / SO ===
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# === Cobertura de pruebas ===
+.coverage
+htmlcov/

@@ -1,0 +1,9 @@
+# Archivo de ejemplo de semillas para los generadores del módulo.
+# Una semilla por línea. Las líneas que empiezan con '#' son comentarios.
+# Estos valores son ILUSTRATIVOS: cada equipo debe ajustar dígitos y
+# parámetros (a, c, m) según el método a utilizar.
+5735
+1234
+9876
+4321
+7919
