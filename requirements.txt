@@ -13,9 +13,27 @@
 # implementarse ÚNICAMENTE con aritmética básica de Python, sin usar el
 # módulo `random` ni `numpy.random` ni ninguna otra librería de generación
 # aleatoria del lenguaje.
+#
+#   - streamlit -> interfaz gráfica (en /app). Versión verificada contra
+#                  PyPI: requiere numpy>=1.23,<3 y pandas>=1.4.0,<4, ambos
+#                  satisfechos por las versiones fijadas abajo. Requiere
+#                  Python 3.10+ (ya es el requisito del proyecto).
+#
+# NOTA sobre las versiones (actualizado): las versiones originalmente
+# fijadas (numpy 1.26.4, scipy 1.13.0, matplotlib 3.8.4, pandas 2.2.2)
+# no publican wheel precompilado para Python 3.13 en Windows, por lo
+# que pip intenta compilarlas desde el código fuente y falla si no
+# tienes instalado un compilador C/Fortran (gfortran, Visual Studio
+# Build Tools, etc.). Se actualizaron a versiones que sí tienen wheel
+# para cp313-win_amd64 y que son mutuamente compatibles entre sí y con
+# streamlit (verificado contra los `requires_dist` de cada paquete en
+# PyPI). Si alguien del equipo usa Python 3.10-3.12, estas mismas
+# versiones también instalan sin problema (todas publican wheels para
+# esos rangos).
 
-numpy==1.26.4
-matplotlib==3.8.4
-scipy==1.13.0
-pandas==2.2.2
+numpy==2.1.0
+matplotlib==3.9.2
+scipy==1.14.1
+pandas==2.3.3
 pytest==8.2.0
+streamlit==1.62.0

@@ -2,10 +2,9 @@
 
 Verifica ÚNICAMENTE que todos los módulos del proyecto se puedan
 importar sin errores. No prueba lógica de negocio: los generadores y
-las pruebas estadísticas todavía no están implementados (levantan
-`NotImplementedError` al invocarse). Sirve como red de seguridad para
-detectar errores de sintaxis o de importación mientras el equipo
-desarrolla el módulo.
+las pruebas estadísticas todavía no están implementados (son archivos
+placeholder). Sirve como red de seguridad para detectar errores de
+sintaxis o de importación mientras el equipo desarrolla el módulo.
 """
 
 from __future__ import annotations
