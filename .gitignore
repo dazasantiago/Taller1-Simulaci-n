@@ -44,3 +44,6 @@ htmlcov/
 
 # === Streamlit (config/secretos locales; no deben subirse al repo) ===
 .streamlit/
+
+# === Scripts de prueba local ===
+probar.py
