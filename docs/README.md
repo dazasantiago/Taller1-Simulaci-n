@@ -35,10 +35,10 @@ from src.generadores.distribuciones import generar_uniforme, generar_normal
 from src.validacion.pruebas_estadisticas import (
     prueba_medias,
     prueba_varianza,
-    prueba_chi_cuadrado,
+    chi_square_test,
     prueba_ks,
-    prueba_poker,
-    prueba_rachas,
+    poker_test,
+    runs_test,
 )
 ```
 
@@ -76,20 +76,27 @@ consumidores deberían usar en la mayoría de los casos (junto con
 |---|---|---|
 | Medias | `prueba_medias(secuencia: list[float], nivel_confianza: float)` | `dict` (ver contrato común) |
 | Varianza | `prueba_varianza(secuencia: list[float], nivel_confianza: float)` | `dict` (ver contrato común) |
-| Chi-cuadrado | `prueba_chi_cuadrado(secuencia: list[float], n_intervalos: int)` | `dict` (+ `frecuencias_observadas`, `frecuencias_esperadas`) |
+| Chi-cuadrado | `chi_square_test(sequence: list[float], n_intervals: int)` | `dict` (+ `observed_frequencies`, `expected_frequencies`) |
 | Kolmogorov-Smirnov | `prueba_ks(secuencia: list[float])` | `dict` (ver contrato común) |
-| Póker | `prueba_poker(secuencia: list[float], tam_mano: int)` | `dict` (+ `categoria_frecuencias`) |
-| Rachas | `prueba_rachas(secuencia: list[float])` | `dict` (+ `num_rachas`) |
+| Póker | `poker_test(sequence: list[float], hand_size: int)` | `dict` (+ `category_frequencies`) |
+| Rachas | `runs_test(sequence: list[float])` | `dict` (+ `num_runs`) |
+
+> Nota de convención: `chi_square_test`, `poker_test` y `runs_test` usan
+> nombres e identificadores en inglés (código); `prueba_medias`,
+> `prueba_varianza` y `prueba_ks` todavía no se han actualizado a esta
+> convención — quien las implemente debe decidir si las alinea. Los
+> textos que ve el usuario final (títulos de gráfico, etiquetas de ejes)
+> se mantienen en español en las tres ya implementadas.
 
 **Contrato común de retorno** para las 6 pruebas (`dict`):
 
 ```python
 {
-    "estadistico": float,                  # estadístico de prueba calculado
-    "valor_critico": float | None,         # valor crítico teórico/tabla (si aplica)
-    "valor_p": float | None,               # p-valor (si aplica)
-    "pasa_prueba": bool,                   # True si no se rechaza H0
-    "figura": matplotlib.figure.Figure,    # gráfico generado por la prueba
+    "statistic": float,                    # estadístico de prueba calculado
+    "critical_value": float | None,        # valor crítico teórico/tabla (si aplica)
+    "p_value": float | None,               # p-valor (si aplica)
+    "passes_test": bool,                   # True si no se rechaza H0
+    "figure": matplotlib.figure.Figure,    # gráfico generado por la prueba
 }
 ```
 
