@@ -9,13 +9,12 @@ Implementar aquí:
     - prueba_rachas(secuencia)
 """
 import math
-import numpy as np
+import pandas as pd
 from scipy.stats import norm
 
 #Prueba de medias
 def prueba_medias(secuencia, nivel_confianza):
     promedio = sum(secuencia) / len(secuencia)
-    varianza = np.var(secuencia)
 
     alfa = 1-nivel_confianza
     z = norm.ppf(1-alfa/2)
@@ -32,8 +31,6 @@ def prueba_medias(secuencia, nivel_confianza):
         "limite_inferior": Limite_inferior,
         "limite_superior": Limite_superior,
         "promedio": promedio,
-        "varianza": varianza,
         "pasa_prueba": aprovado,
     }
     return resultado
-
