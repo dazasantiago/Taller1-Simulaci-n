@@ -34,10 +34,10 @@ import streamlit as st
 # from src.validacion.pruebas_estadisticas import (
 #     prueba_medias,
 #     prueba_varianza,
-#     prueba_chi_cuadrado,
+#     chi_square_test,
 #     prueba_ks,
-#     prueba_poker,
-#     prueba_rachas,
+#     poker_test,
+#     runs_test,
 # )
 
 st.title("Generadores y Validación de Números Pseudoaleatorios")

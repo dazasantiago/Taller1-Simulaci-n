@@ -45,5 +45,5 @@ htmlcov/
 # === Streamlit (config/secretos locales; no deben subirse al repo) ===
 .streamlit/
 
-# === Scripts de prueba local ===
-probar.py
+# === Configuración local de Claude Code (no compartida con el equipo) ===
+CLAUDE.md
