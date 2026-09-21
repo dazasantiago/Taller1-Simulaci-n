@@ -41,14 +41,21 @@ permitir, sin reimplementar la lógica (que vive en `src/`, ver
   correspondiente (histograma, CDF empírica vs. teórica, etc., según
   la prueba).
 
+## Estructura
+
+- `main.py`: entrada; solo arma las dos pestañas (Generación / Validación).
+- `tab_generacion.py`: un método a la vez, parámetros y semillas (manual o
+  .txt/.csv), tabla exportable e histograma de cada secuencia.
+- `tab_validacion.py`: secuencias en memoria agrupadas por método; botones
+  para probar todas / un grupo / una secuencia y ver resultados.
+- `catalogo.py`: único punto que toca `src/`. Solo ofrece los generadores y
+  pruebas que ya están implementados; los placeholders no se muestran.
+- `estado.py`: memoria de la sesión (`st.session_state`).
+- `semillas.py`: lectura de semillas desde texto, .txt y .csv.
+
 ## Estado actual
 
-- [x] Esqueleto mínimo de la app (`app/main.py`) y esta documentación.
-- [ ] Selectores de método de generación y sus parámetros.
-- [ ] Carga de semillas (archivo / manual).
-- [ ] Selectores de prueba(s) de validación y sus parámetros.
-- [ ] Ejecución y visualización de resultados (tablas y gráficos).
-
-Ninguno de estos puntos pendientes debe implementarse hasta que las
-funciones correspondientes en `src/generadores/` y `src/validacion/`
-estén implementadas y probadas.
+- [x] Selector de método de generación, parámetros y semillas (archivo / manual).
+- [x] Secuencias en memoria, tabla exportable e histograma.
+- [x] Validación por secuencia, por grupo o de todas, con resultados por prueba.
+- [ ] Probar con los generadores y pruebas reales cuando `src/` los tenga.
