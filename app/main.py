@@ -31,14 +31,12 @@ import streamlit as st
 #     congruencial_aditivo,
 # )
 # from src.generadores.distribuciones import generar_uniforme, generar_normal
-# from src.validacion.pruebas_estadisticas import (
-#     prueba_medias,
-#     prueba_varianza,
-#     chi_square_test,
-#     prueba_ks,
-#     poker_test,
-#     runs_test,
-# )
+# from src.validacion.prueba_medias import prueba_medias
+# from src.validacion.prueba_varianza import prueba_varianza
+# from src.validacion.prueba_chi_cuadrado import chi_square_test
+# from src.validacion.prueba_kolmogorov_smirnov import prueba_ks
+# from src.validacion.prueba_poker import poker_test
+# from src.validacion.prueba_rachas import runs_test
 
 st.title("Generadores y Validación de Números Pseudoaleatorios")
 

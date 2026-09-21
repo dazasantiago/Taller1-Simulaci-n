@@ -40,7 +40,7 @@ src/generadores/distribuciones.py      (normaliza a [0,1) / Normal)
   generar_uniforme, generar_normal
               │
               ▼
-src/validacion/pruebas_estadisticas.py (recibe list[float], calcula estadístico + gráfico)
+src/validacion/prueba_*.py (recibe list[float], calcula estadístico + gráfico)
               │
               ▼
 main.py                                 (CLI/menú que orquesta todo lo anterior)
@@ -208,7 +208,12 @@ Taller1/
 │   │   ├── congruencial.py        # Lineal, Multiplicativo, Aditivo
 │   │   └── distribuciones.py      # Uniforme y Normal (Box-Muller)
 │   └── validacion/
-│       └── pruebas_estadisticas.py # Medias, Varianza, Chi², KS, Póker, Rachas
+│       ├── prueba_medias.py
+│       ├── prueba_varianza.py
+│       ├── prueba_chi_cuadrado.py
+│       ├── prueba_kolmogorov_smirnov.py
+│       ├── prueba_poker.py
+│       └── prueba_rachas.py
 ├── app/
 │   ├── main.py                    # Interfaz Streamlit (placeholder, pendiente)
 │   └── README.md                  # Qué debe permitir hacer la interfaz

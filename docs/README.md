@@ -32,14 +32,12 @@ from src.generadores.congruencial import (
     congruencial_aditivo,
 )
 from src.generadores.distribuciones import generar_uniforme, generar_normal
-from src.validacion.pruebas_estadisticas import (
-    prueba_medias,
-    prueba_varianza,
-    chi_square_test,
-    prueba_ks,
-    poker_test,
-    runs_test,
-)
+from src.validacion.prueba_medias import prueba_medias
+from src.validacion.prueba_varianza import prueba_varianza
+from src.validacion.prueba_chi_cuadrado import chi_square_test
+from src.validacion.prueba_kolmogorov_smirnov import prueba_ks
+from src.validacion.prueba_poker import poker_test
+from src.validacion.prueba_rachas import runs_test
 ```
 
 > Nota: si más adelante se decide empaquetar formalmente el módulo
@@ -70,7 +68,7 @@ ocurre en `generar_uniforme`, que es la función que los proyectos
 consumidores deberían usar en la mayoría de los casos (junto con
 `generar_normal` cuando necesiten valores normales).
 
-### Validación (`src/validacion/pruebas_estadisticas.py`)
+### Validación (`src/validacion/prueba_*.py`, un módulo por prueba)
 
 | Función | Firma | Retorno esperado |
 |---|---|---|
@@ -101,7 +99,7 @@ consumidores deberían usar en la mayoría de los casos (junto con
 ```
 
 Cada prueba agrega, además, las llaves específicas indicadas en la
-tabla y en su docstring (ver `src/validacion/pruebas_estadisticas.py`
+tabla y en su docstring (ver el módulo `src/validacion/prueba_*.py` correspondiente
 para el detalle de qué gráfico debe producir cada una).
 
 ## Convenciones que deben respetarse como biblioteca

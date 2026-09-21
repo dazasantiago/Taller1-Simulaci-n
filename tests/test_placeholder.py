@@ -20,7 +20,12 @@ MODULOS = [
     "src.generadores.congruencial",
     "src.generadores.distribuciones",
     "src.validacion",
-    "src.validacion.pruebas_estadisticas",
+    "src.validacion.prueba_medias",
+    "src.validacion.prueba_varianza",
+    "src.validacion.prueba_chi_cuadrado",
+    "src.validacion.prueba_kolmogorov_smirnov",
+    "src.validacion.prueba_poker",
+    "src.validacion.prueba_rachas",
     "main",
 ]
 
