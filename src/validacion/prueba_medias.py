@@ -3,25 +3,31 @@ import math
 
 from scipy.stats import norm
 
+ALPHA = 0.05
 
-def prueba_medias(secuencia):
-    alfa = 0.05
-    n = len(secuencia)
-    promedio = sum(secuencia) / n
-    z = norm.ppf(1-(alfa/2))
+#Prueba de medias
+def means_test(sequence):
+    n = len(sequence)
+    mean = sum(sequence) / n
+    z = norm.ppf(1 - (ALPHA / 2))
 
-    Limite_inferior = 0.5 - z *math.sqrt(1/(12*len(secuencia)))
-    Limite_superior = 0.5 + z *math.sqrt(1/(12*len(secuencia)))
+    lower_bound = 0.5 - z * math.sqrt(1 / (12 * n))
+    upper_bound = 0.5 + z * math.sqrt(1 / (12 * n))
 
-    if Limite_inferior < promedio < Limite_superior:
-        aprovado = True
-    else:
-        aprovado = False
+    passed_test = lower_bound < mean < upper_bound
 
-    resultado = {
-        "limite_inferior": Limite_inferior,
-        "limite_superior": Limite_superior,
-        "promedio": promedio,
-        "pasa_prueba": aprovado,
+    result = {
+        "lower_bound": lower_bound,
+        "upper_bound": upper_bound,
+        "mean": mean,
+        "passed_test": passed_test,
+        # Spanish backward-compatibility keys
+        "limite_inferior": lower_bound,
+        "limite_superior": upper_bound,
+        "promedio": mean,
+        "pasa_prueba": passed_test,
     }
-    return resultado
+    return result
+
+
+prueba_medias = means_test

@@ -2,31 +2,40 @@
 import pandas as pd
 from scipy.stats import chi2
 
+ALPHA = 0.05
 
-def prueba_varianza(secuencia):
-    alfa = 0.05
-    n = len(secuencia)
-    promedio = sum(secuencia) / n
-    varianza = pd.Series(secuencia).var()
+def variance_test(sequence):
+    n = len(sequence)
+    mean = sum(sequence) / n
+    variance = pd.Series(sequence).var()
 
-    chi2_inferior = chi2.ppf(alfa / 2, n - 1)
-    chi2_superior = chi2.ppf(1-alfa / 2, n - 1)
+    chi2_lower = chi2.ppf(ALPHA / 2, n - 1)
+    chi2_upper = chi2.ppf(1 - ALPHA / 2, n - 1)
 
-    Limite_inferior = chi2_inferior / (12 * (n - 1))
-    Limite_superior = chi2_superior / (12 * (n - 1))
+    lower_bound = chi2_lower / (12 * (n - 1))
+    upper_bound = chi2_upper / (12 * (n - 1))
 
-    if Limite_inferior < varianza < Limite_superior:
-        aprovado = True
-    else:
-        aprovado = False
+    passed_test = lower_bound < variance < upper_bound
 
-    resultado = {
-        "chi_inferior": chi2_inferior,
-        "chi_superior": chi2_superior,
-        "limite_inferior": Limite_inferior,
-        "limite_superior": Limite_superior,
-        "Promedio": promedio,
-        "varianza": varianza,
-        "pasa_prueba": aprovado,
+    result = {
+        "chi_lower": chi2_lower,
+        "chi_upper": chi2_upper,
+        "lower_bound": lower_bound,
+        "upper_bound": upper_bound,
+        "mean": mean,
+        "variance": variance,
+        "passed_test": passed_test,
+        # Spanish backward-compatibility keys
+        "chi_inferior": chi2_lower,
+        "chi_superior": chi2_upper,
+        "limite_inferior": lower_bound,
+        "limite_superior": upper_bound,
+        "Promedio": mean,
+        "promedio": mean,
+        "varianza": variance,
+        "pasa_prueba": passed_test,
     }
-    return resultado
+    return result
+
+
+prueba_varianza = variance_test
