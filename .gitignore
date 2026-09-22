@@ -16,8 +16,8 @@ __pycache__/
 .ipynb_checkpoints/
 
 # === Salidas generadas (gráficos, histogramas, exportes) ===
-outputs/*
-!outputs/.gitkeep
+**/outputs/*
+!**/outputs/.gitkeep
 
 # === Datos generados/temporales (no confundir con /data/seeds versionado) ===
 *.log
