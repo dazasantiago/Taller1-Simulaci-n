@@ -1,10 +1,12 @@
-"""Prueba de Kolmogorov-Smirnov: pendiente de implementar (ver docs/README.md)."""
-import math
-import pandas as pd
-from scipy.stats import norm, chi2
+from scipy.stats import kstwo
 
 
-def ks_test(sequence, k):
+ALPHA = 0.05
+def get_ks_critical_value(n):
+    return float(kstwo.ppf(1 - ALPHA, n))
+
+
+def ks_test(sequence, k=10, alpha=0.05):
     n = len(sequence)
     mean = sum(sequence) / n
     minimum = min(sequence)
@@ -72,7 +74,7 @@ def ks_test(sequence, k):
         })
 
     d_max = max(differences)
-    d_max_p = 1.36 / math.sqrt(n)
+    d_max_p = get_ks_critical_value(n)
     passed_test = d_max <= d_max_p
 
     result = {
