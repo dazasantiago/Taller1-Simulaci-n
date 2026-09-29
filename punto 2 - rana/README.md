@@ -1,11 +1,11 @@
 # Punto 2 — Simulación de la rana (caminata aleatoria 1D)
 
 Simulación de caminatas aleatorias simétricas en 1D por lotes encadenados.
-Usa los generadores del Punto 3 (`cuadrados_medios`, `multiplicativo`) y
-sus pruebas de validación.
+Usa los generadores del Punto 3 (`cuadrados_medios`, `lineal`,
+`multiplicativo`) y sus pruebas de validación.
 
 Este README cubre **únicamente el apartado "Simulación computacional
-unidimensional"** del taller, 
+unidimensional"** del taller, en el orden en que lo pide el enunciado.
 
 ---
 
@@ -23,18 +23,18 @@ automáticamente. No hay que instalarlos por separado.
 
 ---
 
-## Orden de ejecución (para cada literal de 1D en el taller)
+## Orden de ejecución (según el taller)
 
 ### Paso 1 — Implementar el programa que simula hasta el millonésimo salto
 
-El programa ya está implementado en el archivo `rana_1d.py`.
-La simulación se corre con:
+El programa ya está implementado en `rana_1d.py`. Corre la simulación
+oficial con:
 
     cd "punto 2 - rana"
     python rana_1d.py --generador multiplicativo --n_pasos 1000000 --n_rep 100
 
 Esto simula 100 réplicas × 1.000.000 de pasos con el generador
-multiplicativo. Guarda datos de análisis en:
+multiplicativo. Guarda:
 
 - `outputs/histograma_1d.png`
 - `outputs/finales_1d.csv`
@@ -45,26 +45,26 @@ La semilla se cambia con `--semilla`:
 
     python rana_1d.py --semilla 777 --n_pasos 1000000 --n_rep 100
 
-Las 100 réplicas usan semillas derivadas de la semilla base. Cada
+Las 100 réplicas usan semillas Weyl derivadas de la semilla base. Cada
 réplica es independiente.
 
 ### Paso 3 — Replicar múltiples simulaciones independientes (al menos 100)
 
 El número de réplicas se cambia con `--n_rep`:
 
-    python rana_1d.py --n_rep 100     
-    python rana_1d.py --n_rep 500     
+    python rana_1d.py --n_rep 100     # mínimo del taller
+    python rana_1d.py --n_rep 500     # más réplicas para histograma suave
 
 ### Paso 4 — Generar el histograma de posiciones finales
 
-El histograma se genera automáticamente en cada corrida sobreescribiendo lo que quedo del anterior:
+El histograma se genera automáticamente en cada corrida:
 
     python rana_1d.py --generador multiplicativo --n_pasos 1000000 --n_rep 100
 
 Resultado: `outputs/histograma_1d.png` con las posiciones finales +
 curva normal teórica.
 
-### Paso 5 — Añadir trayectorias 
+### Paso 5 — Añadir trayectorias (opcional, evidencia visual)
 
     python rana_1d.py --generador multiplicativo --n_pasos 1000000 --n_rep 100 --trayectorias
 
@@ -90,8 +90,9 @@ Resultado esperado: `OK, equivalentes`.
 
 ---
 
-## Comando para obtener todo lo solictado respecto a 1D en simulación (la corrida oficial)
+## Comando todo-en-uno (la corrida oficial)
 
+Si solo quieres la corrida completa del taller:
 
     cd "punto 2 - rana"
     python rana_1d.py --generador multiplicativo --n_pasos 1000000 --n_rep 100 --trayectorias
@@ -108,12 +109,48 @@ Eso produce todo lo que pide el apartado 1D.
 | `--n_rep` | int | `100` | Número de réplicas independientes. |
 | `--n_pasos` | int | `1_000_000` | Pasos por réplica. |
 | `--n_lote` | int | `1000` | Tamaño de cada lote. |
-| `--generador` | str | `cuadrados_medios` | `cuadrados_medios` o `multiplicativo`. |
+| `--generador` | str | `cuadrados_medios` | `cuadrados_medios`, `lineal` o `multiplicativo`. |
 | `--archivo_semillas` | str | `None` | Ruta a `.txt`/`.csv` con semillas. |
-| `--salida` | str | `"outputs"` | Carpeta de salida. |
+| `--salida` | str | `"outputs"` | Carpeta de salida de PNG y CSV. |
 | `--validar` | flag | off | Corre validación del conjunto y termina. |
 | `--solo_verificar` | flag | off | Corre solo la equivalencia de lotes y termina. |
 | `--trayectorias` | flag | off | Genera gráfico de trayectorias. |
+
+---
+
+## Generadores disponibles
+
+| Nombre | Estado | ¿Pasa las 6 pruebas? | Firma |
+|---|---|---|---|
+| `cuadrados_medios` | ✅ Conectado | `(semilla, n_digitos, cantidad)` |
+| `lineal` | ✅ Conectado | ✅ Pasa las 6 pruebas | `(seed, a, c, m, count)` |
+| `multiplicativo` | ✅ Conectado | ✅ Pasa las 6 pruebas | `(seed, a, m, count)` |
+
+**Recomendación**: usa `multiplicativo` para la corrida oficial. `lineal`
+también funciona pero el multiplicativo suele dar mejores resultados
+en las pruebas.
+
+`cuadrados_medios` se deja implementado como referencia y para análisis
+comparativo. Falla porque con solo 4 dígitos tiende a caer en ciclos
+cortos o en cero. Esto es un resultado válido y didáctico.
+
+---
+
+## Ejecutar con cada generador
+
+Para comparar los tres generadores sin sobrescribir figuras:
+
+    python rana_1d.py --generador multiplicativo --n_pasos 1000000 --n_rep 100 --salida outputs/multiplicativo
+    python rana_1d.py --generador lineal --n_pasos 1000000 --n_rep 100 --salida outputs/lineal
+    python rana_1d.py --generador cuadrados_medios --n_pasos 1000000 --n_rep 100 --salida outputs/cuadrados_medios
+
+Cada corrida deja sus PNGs y CSV en su propia carpeta.
+
+Validar los tres:
+
+    python rana_1d.py --validar --generador multiplicativo
+    python rana_1d.py --validar --generador lineal
+    python rana_1d.py --validar --generador cuadrados_medios
 
 ---
 
@@ -159,24 +196,11 @@ Eso produce todo lo que pide el apartado 1D.
 
 | Archivo | Cuándo | Contiene |
 |---|---|---|
-| `outputs/histograma_1d.png` | Siempre | Histograma de posiciones finales + normal teórica. |
-| `outputs/trayectorias_1d.png` | Con `--trayectorias` | 10 trayectorias de ejemplo. |
-| `outputs/finales_1d.csv` | Siempre | Tabla: réplica, semilla, posición final. |
+| `<salida>/histograma_1d.png` | Siempre | Histograma de posiciones finales + normal teórica. |
+| `<salida>/trayectorias_1d.png` | Con `--trayectorias` | 10 trayectorias de ejemplo. |
+| `<salida>/finales_1d.csv` | Siempre | Tabla: réplica, semilla, posición final. |
 
----
-
-## Generadores disponibles
-
-| Nombre | Estado | Resultado de las pruebas |
-|---|---|---|
-| `cuadrados_medios` | ✅ Conectado | 
-| `multiplicativo` | ✅ Conectado | 
-
-**Importante**: para la corrida oficial usa `--generador multiplicativo`.
-El generador de cuadrados medios falla las pruebas de varianza, chi²,
-KS, póker y rachas. Lo que es **esperado** con solo 4 dígitos: el método
-tiene tendencia a caer en ciclos cortos o en cero. Se deja implementado
-como referencia y para análisis comparativo.
+Donde `<salida>` es el valor de `--salida` (default: `outputs`).
 
 ---
 
@@ -186,9 +210,10 @@ Desde la terminal:
 
     xdg-open outputs/histograma_1d.png
 
-Desde VS Code: navega a `outputs/` en el panel izquierdo y haz doble clic.
+Desde VS Code: navega a la carpeta de salida en el panel izquierdo y
+haz doble clic en el PNG.
 
-Desde el explorador de archivos: abre `outputs/` y haz doble clic.
+Desde el explorador de archivos: abre la carpeta y haz doble clic.
 
 ---
 
@@ -234,12 +259,15 @@ Esto garantiza que las semillas estén bien separadas entre sí.
         ├── trayectorias_1d.png
         └── finales_1d.csv
 
+Si usas `--salida outputs/<nombre>`, se crea una subcarpeta por corrida.
+
 ---
 
 ## Arquitectura
 
     Punto 3 (generadores y validación)
     ├── cuadrados_medios(semilla, n_digitos, cantidad) -> list[int]
+    ├── congruencial_lineal(seed, a, c, m, count) -> list[int]
     ├── congruencial_multiplicativo(seed, a, m, count) -> list[int]
     ├── distribuciones.uniforme_desde_enteros(enteros, m) -> list[float]
     └── validacion/
@@ -255,17 +283,21 @@ Esto garantiza que las semillas estén bien separadas entre sí.
 
 El wrapper `GeneradorConectado` une el generador del equipo con la
 caminata: pide enteros, los normaliza a uniformes, y arrastra el estado
-de un lote al siguiente.
+de un lote al siguiente. Se adapta a los nombres de los parámetros de
+cada generador (`cantidad`/`count`, `semilla`/`seed`).
 
 ---
 
 ## Cambiar de generador
 
-El único punto a modificar es `crear_generador` dentro de `rana_1d.py`.
-Pero desde la CLI ya se elige con `--generador`:
+Se elige desde la CLI con `--generador`:
 
     python rana_1d.py --generador multiplicativo
+    python rana_1d.py --generador lineal
     python rana_1d.py --generador cuadrados_medios
+
+Si quieres añadir otro generador en el futuro, el único punto a
+modificar es `crear_generador` dentro de `rana_1d.py`.
 
 ---
 
@@ -280,3 +312,17 @@ Para generalizar a 2D y 3D:
 5. La lógica de lotes encadenados es idéntica en todas las dimensiones.
 
 ---
+
+## Resumen del estado del apartado 1D
+
+| Requisito del taller | Estado |
+|---|---|
+| Programa que simule hasta el millonésimo salto | ✅ |
+| Permite modificar la semilla | ✅ |
+| Al menos 100 réplicas independientes | ✅ |
+| Validación estadística del generador | ✅ |
+| Visualización (histograma) | ✅ |
+| Evidencia visual (trayectorias) | ✅ |
+| Estrategia de lotes encadenados | ✅ |
+| Equivalencia lotes vs. continuo | ✅ |
+| Tres generadores conectados | ✅ |
