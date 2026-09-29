@@ -19,14 +19,14 @@ exactamente el mismo resultado (ver `verificar()`).
 
 Arquitectura
 ------------
-- Los generadores del equipo (Punto 3) producen enteros Xi.
-- El módulo `distribuciones` (Punto 3) los convierte a uniformes Ri en [0, 1).
+- Los generadores producen enteros Xi.
+- El módulo de distribuciones los convierte a uniformes Ri en [0, 1).
 - La caminata usa los Ri para decidir cada paso (+1 si Ri < 0.5, -1 si no).
-- Las pruebas de validación (Punto 3) validan los uniformes generados.
+- Las pruebas de validación validan los uniformes generados.
 
 El wrapper `GeneradorConectado` es el punto de unión entre el generador
-del equipo y la caminata. Si mañana cambia la firma del generador, solo
-se modifica ese wrapper.
+y la caminata. Se adapta a los nombres de los parámetros de
+cada generador.
 
 Convenciones y notación
 -----------------------
@@ -63,65 +63,81 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-# ----------------------------------------------------------------------------
-# Rutas a los módulos del Punto 3
-# ----------------------------------------------------------------------------
+
+# Rutas a los módulos de generadores
 RUTA_PUNTO_3 = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "..", "punto 3 - generadores", "src"
 )
 sys.path.insert(0, RUTA_PUNTO_3)
 
-# Generador
+# Generadores
+from generadores.congruencial import congruencial_multiplicativo
 from generadores.cuadrados_medios import cuadrados_medios
 
 # Distribuciones
 from generadores.distribuciones import uniforme_desde_enteros
+from validacion.prueba_chi_cuadrado import chi_square_test
+from validacion.prueba_kolmogorov_smirnov import ks_test
 
 # Pruebas de validación
 from validacion.prueba_medias import means_test
-from validacion.prueba_varianza import variance_test
-from validacion.prueba_chi_cuadrado import chi_square_test
-from validacion.prueba_kolmogorov_smirnov import ks_test
 from validacion.prueba_poker import poker_test
 from validacion.prueba_rachas import runs_test
+from validacion.prueba_varianza import variance_test
 
-
-# ============================================================================
 # 1. WRAPPER DE GENERADORES
-# ============================================================================
+
 class GeneradorConectado:
-    """Envuelve un generador del equipo para que la caminata lo use.
+    """Envuelve un generador para que la caminata lo use.
 
     Parámetros del constructor
     --------------------------
-    funcion : callable
-        Función generadora. Firma asumida:
-            funcion(semilla, ..., cantidad) -> list[int]
-        donde `cantidad` es cuántos enteros generar.
-    m : int
+    funcion : 
+        Función generadora. Debe aceptar `**kwargs`.
+    modulo : int
         Módulo del generador. Se usa para normalizar Xi -> Ri.
+    nombre_cantidad : str, opcional (default="cantidad")
+        Nombre del parámetro que indica cuántos valores generar.
+    nombre_semilla : str, opcional (default="semilla")
+        Nombre del parámetro que guarda el estado (semilla).
     **parametros : dict
-        Parámetros específicos del generador (semilla, n_digitos, etc.).
+        Parámetros fijos del generador (a, c, m, n_digitos, etc.).
+        Deben incluir la semilla inicial con el nombre `nombre_semilla`.
     """
 
-    def __init__(self, funcion, m, **parametros):
-        if "semilla" not in parametros:
-            raise ValueError("Se requiere 'semilla' en los parámetros.")
+    def __init__(self, funcion, modulo, nombre_cantidad="cantidad",
+                 nombre_semilla="semilla", **parametros):
+        if nombre_semilla not in parametros:
+            raise ValueError(f"Se requiere '{nombre_semilla}' en los parámetros.")
         self.funcion = funcion
-        self.m = m
+        self.m = modulo
+        self.nombre_cantidad = nombre_cantidad
+        self.nombre_semilla = nombre_semilla
         self.parametros = parametros
 
     def siguiente_lote(self, cantidad):
-        """Genera `cantidad` uniformes en [0, 1) y encadena el estado."""
-        enteros = self.funcion(cantidad=cantidad, **self.parametros)
-        self.parametros["semilla"] = enteros[-1]
+        """Genera `cantidad` uniformes en [0, 1) y encadena el estado.
+
+        Parámetros
+        ----------
+        cantidad : int
+            Número de valores a generar en este lote.
+
+        Retorna
+        -------
+        list[float]
+            Valores uniformes Ri en [0, 1).
+        """
+        kwargs = {self.nombre_cantidad: cantidad, **self.parametros}
+        enteros = self.funcion(**kwargs)
+        # Encadenamiento: el último entero es la nueva semilla.
+        self.parametros[self.nombre_semilla] = enteros[-1]
         return uniforme_desde_enteros(enteros, self.m)
 
 
-# ============================================================================
+
 # 2. CONFIGURACIÓN DE GENERADORES
-# ============================================================================
 def crear_generador(semilla, tipo="cuadrados_medios"):
     """Crea un generador conectado a la caminata.
 
@@ -135,42 +151,75 @@ def crear_generador(semilla, tipo="cuadrados_medios"):
     Retorna
     -------
     GeneradorConectado
+        Objeto con método `.siguiente_lote(cantidad)`.
 
     Lanza
     -----
     ValueError
-        Si el tipo no es reconocido.
+        Si el tipo de generador no es reconocido.
     """
     if tipo == "cuadrados_medios":
         n_digitos = 4
         m = 10 ** n_digitos
         return GeneradorConectado(
             funcion=cuadrados_medios,
-            m=m,
+            modulo=m,
+            nombre_cantidad="cantidad",
+            nombre_semilla="semilla",
             semilla=semilla % m,
             n_digitos=n_digitos,
         )
     elif tipo == "multiplicativo":
-        # PENDIENTE: conectar cuando el equipo implemente congruencial.py
-        raise NotImplementedError(
-            "El generador multiplicativo aún no está implementado en el equipo."
+        m = 2 ** 31
+        a = 1103515245
+        # El multiplicativo no acepta semilla múltiplo de m (degenera en ceros).
+        s = semilla % m
+        if s == 0:
+            s = 1
+        return GeneradorConectado(
+            funcion=congruencial_multiplicativo,
+            modulo=m,
+            nombre_cantidad="count",
+            nombre_semilla="seed",
+            seed=s,
+            a=a,
+            m=m,
         )
     else:
         raise ValueError(
-            f"Generador '{tipo}' no reconocido. Use 'cuadrados_medios'."
+            f"Generador '{tipo}' no reconocido. "
+            "Use 'cuadrados_medios' o 'multiplicativo'."
         )
 
 
-# ============================================================================
 # 3. SEMILLAS
-# ============================================================================
 def semillas_desde_base(semilla_base, n_rep):
-    """Genera `n_rep` semillas separadas por la constante de Weyl."""
+    """Genera `n_rep` semillas separadas por la constante de Weyl.
+
+    Parámetros
+    ----------
+    semilla_base : int
+    n_rep : int
+
+    Retorna
+    -------
+    list[int]
+    """
     return [(semilla_base + i * 2654435761) % 2**32 for i in range(n_rep)]
 
 
 def semillas_desde_archivo(ruta, n_rep):
-    """Lee semillas desde un archivo .txt o .csv."""
+    """Lee semillas desde un archivo .txt o .csv.
+
+    Parámetros
+    ----------
+    ruta : str
+    n_rep : int
+
+    Retorna
+    -------
+    list[int]
+    """
     with open(ruta, encoding="utf-8") as f:
         texto = f.read().replace(",", " ").replace(";", " ")
     semillas = [int(t) for t in texto.split()]
@@ -179,13 +228,25 @@ def semillas_desde_archivo(ruta, n_rep):
     return semillas[:n_rep]
 
 
-# ============================================================================
+
 # 4. SIMULACIÓN POR LOTES
-# ============================================================================
 def avanzar_lote(gen, pos, visito, n_lote, paso_inicio, marca=1000):
     """Avanza `n_lote` pasos partiendo del estado recibido.
 
-    Retorna (nueva_pos, nuevo_visito, registro | None).
+    Parámetros
+    ----------
+    gen : GeneradorConectado
+    pos : int
+    visito : bool
+    n_lote : int
+    paso_inicio : int
+    marca : int, opcional (default=1000)
+
+    Retorna
+    -------
+    nueva_pos : int
+    nuevo_visito : bool
+    registro : tuple(int, bool) | None
     """
     u = np.asarray(gen.siguiente_lote(n_lote))
     pasos = np.where(u < 0.5, 1, -1)
@@ -202,7 +263,23 @@ def avanzar_lote(gen, pos, visito, n_lote, paso_inicio, marca=1000):
 
 def simular_replica(semilla, n_pasos, n_lote, marca=1000, guardar_tray=False,
                     tipo="cuadrados_medios"):
-    """Simula UNA réplica completa."""
+    """Simula UNA réplica completa.
+
+    Parámetros
+    ----------
+    semilla : int
+    n_pasos : int
+    n_lote : int
+    marca : int, opcional (default=1000)
+    guardar_tray : bool, opcional (default=False)
+    tipo : str, opcional (default="cuadrados_medios")
+
+    Retorna
+    -------
+    pos : int
+    reg : tuple(int, bool) | None
+    trayectoria : list[int] | None
+    """
     gen = crear_generador(semilla, tipo=tipo)
     pos, visito, hecho, reg = 0, False, 0, None
     trayectoria = [] if guardar_tray else None
@@ -220,7 +297,22 @@ def simular_replica(semilla, n_pasos, n_lote, marca=1000, guardar_tray=False,
 
 
 def simular(semillas, n_pasos, n_lote, marca=1000, tipo="cuadrados_medios"):
-    """Simula todas las réplicas."""
+    """Simula todas las réplicas.
+
+    Parámetros
+    ----------
+    semillas : list[int]
+    n_pasos : int
+    n_lote : int
+    marca : int, opcional (default=1000)
+    tipo : str, opcional (default="cuadrados_medios")
+
+    Retorna
+    -------
+    finales : np.ndarray[int]
+    pos_marca : np.ndarray[int]
+    visito_marca : np.ndarray[bool]
+    """
     finales, pos_marca, visito_marca = [], [], []
     for s in semillas:
         pos, reg, _ = simular_replica(s, n_pasos, n_lote, marca, tipo=tipo)
@@ -231,11 +323,21 @@ def simular(semillas, n_pasos, n_lote, marca=1000, tipo="cuadrados_medios"):
     return np.array(finales), np.array(pos_marca), np.array(visito_marca)
 
 
-# ============================================================================
 # 5. VERIFICACIÓN
-# ============================================================================
+
 def verificar(semilla=12345, n_pasos=5000, tipo="cuadrados_medios"):
-    """Comprueba que lotes encadenados == corrida continua."""
+    """Comprueba que lotes encadenados == corrida continua.
+
+    Parámetros
+    ----------
+    semilla : int, opcional (default=12345)
+    n_pasos : int, opcional (default=5000)
+    tipo : str, opcional (default="cuadrados_medios")
+
+    Retorna
+    -------
+    bool
+    """
     a, _, _ = simular_replica(semilla, n_pasos, n_lote=n_pasos, tipo=tipo)
     b, _, _ = simular_replica(semilla, n_pasos, n_lote=137, tipo=tipo)
     ok = (a == b)
@@ -259,7 +361,7 @@ def validar_conjunto(semilla=12345, cantidad=10000, tipo="cuadrados_medios"):
     """Valida el conjunto generador + distribuciones + caminata.
 
     Corre las 6 pruebas del Punto 3 sobre los uniformes del generador,
-    y además valida la caminata (paridad, media, sigma).
+    y además valida la caminata.
 
     Parámetros
     ----------
@@ -276,10 +378,8 @@ def validar_conjunto(semilla=12345, cantidad=10000, tipo="cuadrados_medios"):
     print(f"VALIDACIÓN DEL CONJUNTO (generador: {tipo})")
     print("=" * 65)
 
-    # Generar uniformes
     gen = crear_generador(semilla, tipo=tipo)
     u = gen.siguiente_lote(cantidad)
-    # Filtrar 0 y 1 para pruebas que no los aceptan
     u_lista = [float(x) if 0 < x < 1 else 0.5 for x in u]
 
     resultados = {}
@@ -288,14 +388,16 @@ def validar_conjunto(semilla=12345, cantidad=10000, tipo="cuadrados_medios"):
     r = means_test(u_lista)
     pasa = _extraer_pasa(r)
     resultados["medias"] = pasa
-    print(f"1. Medias:     media={r.get('mean', r.get('promedio')):.4f}  "
+    media = r.get("mean", r.get("promedio", 0))
+    print(f"1. Medias:     media={float(media):.4f}  "
           f"-> {'PASA' if pasa else 'FALLA'}")
 
     # 2. Varianza
     r = variance_test(u_lista)
     pasa = _extraer_pasa(r)
     resultados["varianza"] = pasa
-    print(f"2. Varianza:   var={float(r.get('variance', r.get('varianza', 0))):.5f}  "
+    var = r.get("variance", r.get("varianza", 0))
+    print(f"2. Varianza:   var={float(var):.5f}  "
           f"-> {'PASA' if pasa else 'FALLA'}")
 
     # 3. Chi cuadrado
@@ -312,7 +414,7 @@ def validar_conjunto(semilla=12345, cantidad=10000, tipo="cuadrados_medios"):
     print(f"4. KS:         D={r.get('d_max', 0):.4f}  "
           f"-> {'PASA' if pasa else 'FALLA'}")
 
-    # 5. Póker (necesita muchas muestras)
+    # 5. Póker
     r = poker_test(u_lista, hand_size=5)
     pasa = _extraer_pasa(r)
     resultados["poker"] = pasa
@@ -348,7 +450,13 @@ def validar_conjunto(semilla=12345, cantidad=10000, tipo="cuadrados_medios"):
 # 7. ANÁLISIS Y VISUALIZACIONES
 # ============================================================================
 def resumir(finales, n_pasos):
-    """Imprime estadísticas descriptivas."""
+    """Imprime estadísticas descriptivas.
+
+    Parámetros
+    ----------
+    finales : np.ndarray[int]
+    n_pasos : int
+    """
     sigma = math.sqrt(n_pasos)
     print("=" * 60)
     print(f"Réplicas: {len(finales)} | pasos: {n_pasos}")
@@ -362,7 +470,14 @@ def resumir(finales, n_pasos):
 
 
 def graficar_histograma(finales, n_pasos, ruta):
-    """Histograma de posiciones finales + normal teórica."""
+    """Histograma de posiciones finales + normal teórica.
+
+    Parámetros
+    ----------
+    finales : np.ndarray[int]
+    n_pasos : int
+    ruta : str
+    """
     sigma = math.sqrt(n_pasos)
     plt.figure(figsize=(8, 5))
     plt.hist(finales, bins=20, density=True, edgecolor="black",
@@ -383,7 +498,17 @@ def graficar_histograma(finales, n_pasos, ruta):
 
 def graficar_trayectorias(semillas, n_pasos, n_lote, ruta, n_mostrar=10,
                           tipo="cuadrados_medios"):
-    """Dibuja unas pocas trayectorias."""
+    """Dibuja unas pocas trayectorias.
+
+    Parámetros
+    ----------
+    semillas : list[int]
+    n_pasos : int
+    n_lote : int
+    ruta : str
+    n_mostrar : int, opcional (default=10)
+    tipo : str, opcional (default="cuadrados_medios")
+    """
     plt.figure(figsize=(10, 5))
     for s in semillas[:n_mostrar]:
         _, _, tray = simular_replica(s, n_pasos, n_lote, guardar_tray=True, tipo=tipo)
@@ -404,7 +529,14 @@ def graficar_trayectorias(semillas, n_pasos, n_lote, ruta, n_mostrar=10,
 # 8. MAIN
 # ============================================================================
 def main(argv=None):
-    """Punto de entrada."""
+    """Punto de entrada.
+
+    Parámetros
+    ----------
+    argv : list[str] | None
+        Argumentos CLI. Si es None, parsea sys.argv ignorando argumentos
+        desconocidos (útil en Colab).
+    """
     p = argparse.ArgumentParser(description="Caminata aleatoria 1D por lotes.")
     p.add_argument("--semilla", type=int, default=12345)
     p.add_argument("--n_rep", type=int, default=100)

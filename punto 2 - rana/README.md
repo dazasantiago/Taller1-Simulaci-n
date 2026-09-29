@@ -1,78 +1,102 @@
 # Punto 2 — Simulación de la rana (caminata aleatoria 1D)
 
 Simulación de caminatas aleatorias simétricas en 1D por lotes encadenados.
+Usa los generadores del Punto 3 (`cuadrados_medios`, `multiplicativo`) y
+sus pruebas de validación.
+
+Este README cubre **únicamente el apartado "Simulación computacional
+unidimensional"** del taller, 
 
 ---
 
-## Formas de correrlo
+## Requisitos
 
-### 1. Corrida por defecto
+- Python 3.12+
+- Paquetes: `numpy`, `matplotlib`, `scipy`, `pandas`
+
+Instalación (dentro del venv del repo):
+
+    pip install numpy matplotlib scipy pandas
+
+El módulo `distribuciones` y los generadores del Punto 3 se importan
+automáticamente. No hay que instalarlos por separado.
+
+---
+
+## Orden de ejecución (para cada literal de 1D en el taller)
+
+### Paso 1 — Implementar el programa que simula hasta el millonésimo salto
+
+El programa ya está implementado en el archivo `rana_1d.py`.
+La simulación se corre con:
 
     cd "punto 2 - rana"
-    python rana_1d.py
+    python rana_1d.py --generador multiplicativo --n_pasos 1000000 --n_rep 100
 
-Corre 100 réplicas × 1.000.000 de pasos con semilla base `12345`.
+Esto simula 100 réplicas × 1.000.000 de pasos con el generador
+multiplicativo. Guarda datos de análisis en:
 
-### 2. Corrida con trayectorias
+- `outputs/histograma_1d.png`
+- `outputs/finales_1d.csv`
 
-    python rana_1d.py --trayectorias
+### Paso 2 — Modificar la semilla del generador
 
-Igual que la anterior, pero además genera el gráfico de trayectorias.
+La semilla se cambia con `--semilla`:
 
-### 3. Corrida corta (pruebas rápidas)
+    python rana_1d.py --semilla 777 --n_pasos 1000000 --n_rep 100
 
-    python rana_1d.py --n_pasos 10000 --n_rep 20
+Las 100 réplicas usan semillas derivadas de la semilla base. Cada
+réplica es independiente.
 
-Corre 20 réplicas × 10.000 pasos. Tarda segundos.
+### Paso 3 — Replicar múltiples simulaciones independientes (al menos 100)
 
-### 4. Cambiar la semilla base
+El número de réplicas se cambia con `--n_rep`:
 
-    python rana_1d.py --semilla 777
+    python rana_1d.py --n_rep 100     
+    python rana_1d.py --n_rep 500     
 
-Usa `777` como semilla base para generar las 100 réplicas.
+### Paso 4 — Generar el histograma de posiciones finales
 
-### 5. Cambiar el número de réplicas
+El histograma se genera automáticamente en cada corrida sobreescribiendo lo que quedo del anterior:
 
-    python rana_1d.py --n_rep 500
+    python rana_1d.py --generador multiplicativo --n_pasos 1000000 --n_rep 100
 
-Corre 500 réplicas en lugar de 100.
+Resultado: `outputs/histograma_1d.png` con las posiciones finales +
+curva normal teórica.
 
-### 6. Cambiar el tamaño de lote
+### Paso 5 — Añadir trayectorias 
 
-    python rana_1d.py --n_lote 500
+    python rana_1d.py --generador multiplicativo --n_pasos 1000000 --n_rep 100 --trayectorias
 
-Usa lotes de 500 pasos en lugar de 1000.
+Resultado adicional: `outputs/trayectorias_1d.png` con 10 trayectorias
+de ejemplo.
 
-### 7. Cargar semillas desde archivo
+### Paso 6 — Validar el conjunto (generador + distribuciones + caminata)
 
-    python rana_1d.py --archivo_semillas semillas.txt --n_rep 100
+Corre las 6 pruebas del Punto 3 sobre los uniformes del generador, y
+valida la caminata (media, σ, paridad):
 
-El archivo debe tener una semilla por línea (o separadas por comas,
-puntos y coma, o espacios). Ejemplo `semillas.txt`:
+    python rana_1d.py --validar --generador multiplicativo
 
-    12345
-    67890
-    11111
-    22222
+Resultado esperado: `TODO OK`.
 
-### 8. Cambiar la carpeta de salida
+### Paso 7 — Verificar equivalencia lotes vs. continuo
 
-    python rana_1d.py --salida resultados/prueba1
+Confirma que la estrategia de lotes encadenados es correcta:
 
-Guarda PNG y CSV en `resultados/prueba1/` en vez de `outputs/`.
+    python rana_1d.py --solo_verificar --generador multiplicativo
 
-### 9. Solo verificar equivalencia (lotes vs. continuo)
+Resultado esperado: `OK, equivalentes`.
 
-    python rana_1d.py --solo_verificar
+---
 
-Corre solo la verificación y termina. Útil para confirmar que la
-estrategia de lotes encadenados está bien implementada.
+## Comando para obtener todo lo solictado respecto a 1D en simulación (la corrida oficial)
 
-### 10. Ver la ayuda completa
 
-    python rana_1d.py --help
+    cd "punto 2 - rana"
+    python rana_1d.py --generador multiplicativo --n_pasos 1000000 --n_rep 100 --trayectorias
 
-Muestra todos los parámetros disponibles con su descripción.
+Eso produce todo lo que pide el apartado 1D.
 
 ---
 
@@ -80,42 +104,24 @@ Muestra todos los parámetros disponibles con su descripción.
 
 | Argumento | Tipo | Default | Descripción |
 |---|---|---|---|
-| `--semilla` | int | `12345` | Semilla base. Las réplicas usan semillas Weyl derivadas de esta. |
+| `--semilla` | int | `12345` | Semilla base. Las réplicas usan semillas Weyl derivadas. |
 | `--n_rep` | int | `100` | Número de réplicas independientes. |
 | `--n_pasos` | int | `1_000_000` | Pasos por réplica. |
-| `--n_lote` | int | `1000` | Tamaño de cada lote (pasos por lote). |
-| `--archivo_semillas` | str | `None` | Ruta a `.txt` o `.csv` con semillas. Si se da, ignora `--semilla`. |
-| `--salida` | str | `"outputs"` | Carpeta donde se guardan los resultados. |
-| `--solo_verificar` | flag | off | Corre solo la verificación de equivalencia y termina. |
-| `--trayectorias` | flag | off | Genera además el gráfico de trayectorias. |
-
----
-
-## Combinaciones típicas
-
-Corrida oficial del taller:
-
-    python rana_1d.py --n_pasos 1000000 --n_rep 100 --trayectorias
-
-Prueba rápida con semilla distinta:
-
-    python rana_1d.py --semilla 42 --n_pasos 10000 --n_rep 50
-
-Corrida con semillas externas:
-
-    python rana_1d.py --archivo_semillas semillas_ejemplo.txt --n_rep 100 --n_pasos 1000000
-
-Guardar en carpeta separada:
-
-    python rana_1d.py --salida outputs/corrida_oficial
+| `--n_lote` | int | `1000` | Tamaño de cada lote. |
+| `--generador` | str | `cuadrados_medios` | `cuadrados_medios` o `multiplicativo`. |
+| `--archivo_semillas` | str | `None` | Ruta a `.txt`/`.csv` con semillas. |
+| `--salida` | str | `"outputs"` | Carpeta de salida. |
+| `--validar` | flag | off | Corre validación del conjunto y termina. |
+| `--solo_verificar` | flag | off | Corre solo la equivalencia de lotes y termina. |
+| `--trayectorias` | flag | off | Genera gráfico de trayectorias. |
 
 ---
 
 ## Qué produce cada corrida
 
-### Salida en consola
+### Salida en consola (corrida normal)
 
-    Iniciando simulación principal...
+    Iniciando simulación principal (generador: multiplicativo)...
     ============================================================
     Réplicas: 100 | pasos: 1000000
     Media: ... (teórica 0)
@@ -129,27 +135,60 @@ Guardar en carpeta separada:
     Paso por el origen en ≤1000: ... (teórico 0.9748)
     Tiempo: ... s
 
+### Salida en consola (--validar)
+
+    =================================================================
+    VALIDACIÓN DEL CONJUNTO (generador: multiplicativo)
+    =================================================================
+    1. Medias:     media=...     -> PASA
+    2. Varianza:   var=...       -> PASA
+    3. Chi²:       stat=...      -> PASA
+    4. KS:         D=...         -> PASA
+    5. Póker:      stat=...      -> PASA
+    6. Rachas:     runs=...      -> PASA
+    -----------------------------------------------------------------
+    Validación de la caminata (100 réplicas, 10000 pasos):
+      Media: ... (esperado 0)
+      Desv:  ... (esperado 100.00)
+      Paridad: True
+    =================================================================
+    RESULTADO: TODO OK
+    =================================================================
+
 ### Archivos generados
 
-| Archivo | Cuándo se genera | Qué contiene |
+| Archivo | Cuándo | Contiene |
 |---|---|---|
-| `outputs/histograma_1d.png` | Siempre | Histograma de posiciones finales + curva normal teórica. |
+| `outputs/histograma_1d.png` | Siempre | Histograma de posiciones finales + normal teórica. |
 | `outputs/trayectorias_1d.png` | Con `--trayectorias` | 10 trayectorias de ejemplo. |
-| `outputs/finales_1d.csv` | Siempre | Tabla con réplica, semilla, posición final. |
+| `outputs/finales_1d.csv` | Siempre | Tabla: réplica, semilla, posición final. |
 
 ---
 
-## Cómo ver los resultados
+## Generadores disponibles
+
+| Nombre | Estado | Resultado de las pruebas |
+|---|---|---|
+| `cuadrados_medios` | ✅ Conectado | 
+| `multiplicativo` | ✅ Conectado | 
+
+**Importante**: para la corrida oficial usa `--generador multiplicativo`.
+El generador de cuadrados medios falla las pruebas de varianza, chi²,
+KS, póker y rachas. Lo que es **esperado** con solo 4 dígitos: el método
+tiene tendencia a caer en ciclos cortos o en cero. Se deja implementado
+como referencia y para análisis comparativo.
+
+---
+
+## Cómo ver las figuras
 
 Desde la terminal:
 
     xdg-open outputs/histograma_1d.png
 
-Desde VS Code: navega a `outputs/` en el panel izquierdo y haz doble
-clic en el PNG.
+Desde VS Code: navega a `outputs/` en el panel izquierdo y haz doble clic.
 
-Desde el explorador de archivos: abre la carpeta `outputs/` y haz doble
-clic en el PNG.
+Desde el explorador de archivos: abre `outputs/` y haz doble clic.
 
 ---
 
@@ -159,26 +198,23 @@ clic en el PNG.
 
 La rana parte del origen (posición 0). En cada paso:
 
-- `Ri < 0.5` → paso `+1` (adelante)
-- `Ri >= 0.5` → paso `-1` (atrás)
+- `Ri < 0.5` → paso `+1`
+- `Ri >= 0.5` → paso `-1`
 
 Tras `n_pasos` pasos, la posición final es la suma acumulada.
 
 ### Lotes encadenados
 
-En vez de simular 1.000.000 de pasos de un solo golpe, se divide en
-lotes de `n_lote` pasos. El estado que pasa de un lote al siguiente es:
+La caminata se divide en lotes de `n_lote` pasos. El estado que pasa de
+un lote al siguiente es:
 
 1. Posición final del lote anterior → posición inicial del siguiente.
 2. Estado del generador → continúa la secuencia pseudoaleatoria.
 3. Flag `visito` → si la rana ya tocó el origen.
 
 Correr en 1 lote grande o en muchos lotes pequeños da el mismo resultado.
-Verificar con:
 
-    python rana_1d.py --solo_verificar
-
-### Semillas independientes
+### Semillas 
 
 Las réplicas usan semillas separadas por la constante `2654435761`:
 
@@ -200,26 +236,36 @@ Esto garantiza que las semillas estén bien separadas entre sí.
 
 ---
 
+## Arquitectura
+
+    Punto 3 (generadores y validación)
+    ├── cuadrados_medios(semilla, n_digitos, cantidad) -> list[int]
+    ├── congruencial_multiplicativo(seed, a, m, count) -> list[int]
+    ├── distribuciones.uniforme_desde_enteros(enteros, m) -> list[float]
+    └── validacion/
+        ├── prueba_medias
+        ├── prueba_varianza
+        ├── prueba_chi_cuadrado
+        ├── prueba_kolmogorov_smirnov
+        ├── prueba_poker
+        └── prueba_rachas
+
+    Punto 2 (esta carpeta)
+    └── rana_1d.py  →  importa todo lo anterior y simula la caminata
+
+El wrapper `GeneradorConectado` une el generador del equipo con la
+caminata: pide enteros, los normaliza a uniformes, y arrastra el estado
+de un lote al siguiente.
+
+---
+
 ## Cambiar de generador
 
-El único punto a modificar es `crear_generador` dentro de `rana_1d.py`:
+El único punto a modificar es `crear_generador` dentro de `rana_1d.py`.
+Pero desde la CLI ya se elige con `--generador`:
 
-    def crear_generador(semilla):
-        from generadores.congruencial import congruencial_lineal
-        return GeneradorConectado(
-            funcion=congruencial_lineal,
-            m=2**32,
-            semilla=semilla,
-            a=1664525,
-            c=1013904223,
-            m=2**32,
-        )
-
-La firma asumida del generador es:
-
-    funcion(semilla, ..., cantidad) -> list[int]
-
-donde `cantidad` es cuántos enteros debe generar.
+    python rana_1d.py --generador multiplicativo
+    python rana_1d.py --generador cuadrados_medios
 
 ---
 
@@ -232,3 +278,5 @@ Para generalizar a 2D y 3D:
 3. El histograma solo aplica en 1D. En 2D/3D se usan scatter plots.
 4. La paridad solo aplica en 1D.
 5. La lógica de lotes encadenados es idéntica en todas las dimensiones.
+
+---
