@@ -463,8 +463,8 @@ def resumir(finales, n_pasos):
     print(f"Media: {finales.mean():.2f} (teórica 0)")
     print(f"Desv. est.: {finales.std(ddof=1):.2f} (teórica {sigma:.2f})")
     print(f"Mín/Máx: {finales.min()} / {finales.max()}")
-    print(f"Dentro de ±1σ: {np.mean(np.abs(finales) <= sigma):.1%} (normal: 68.3%)")
-    print(f"Dentro de ±2σ: {np.mean(np.abs(finales) <= 2*sigma):.1%} (normal: 95.4%)")
+    print(f"Dentro de +-1 sigma: {np.mean(np.abs(finales) <= sigma):.1%} (normal: 68.3%)")
+    print(f"Dentro de +-2 sigma: {np.mean(np.abs(finales) <= 2*sigma):.1%} (normal: 95.4%)")
     print(f"Paridad correcta: {bool(np.all(finales % 2 == n_pasos % 2))}")
     print("=" * 60)
 
@@ -577,7 +577,7 @@ def main(argv=None):
     resumir(finales, args.n_pasos)
     if len(pos_m):
         print(f"Retorno exacto en paso 1000: {np.mean(pos_m == 0):.4f} (teórico 0.0252)")
-        print(f"Paso por el origen en ≤1000: {vis_m.mean():.4f} (teórico 0.9748)")
+        print(f"Paso por el origen en <=1000: {vis_m.mean():.4f} (teórico 0.9748)")
     print(f"Tiempo: {t:.2f} s")
 
     graficar_histograma(finales, args.n_pasos,
