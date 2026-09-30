@@ -202,3 +202,56 @@ def histograma_frecuencias(valores, n_bins=10, a=0.0, b=1.0):
         frecuencias[idx] += 1
     esperado = len(valores) / n_bins
     return {"bins": bins, "frecuencias": frecuencias, "esperado": esperado}
+
+
+def generar_uniforme(metodo: str, parametros: dict, cantidad: int) -> list[float]:
+    """Genera una lista de `cantidad` números uniformes en [0, 1) a partir de un generador base."""
+    if cantidad <= 0:
+        return []
+
+    if metodo == "cuadrados_medios":
+        try:
+            from src.generadores.cuadrados_medios import cuadrados_medios
+        except ImportError:
+            from generadores.cuadrados_medios import cuadrados_medios
+        semilla = parametros["semilla"]
+        n_digitos = parametros.get("n_digitos", 4)
+        m = 10 ** n_digitos
+        enteros = cuadrados_medios(semilla=semilla, n_digitos=n_digitos, cantidad=cantidad)
+        return uniforme_desde_enteros(enteros, m)
+
+    elif metodo == "congruencial_lineal":
+        try:
+            from src.generadores.congruencial import congruencial_lineal
+        except ImportError:
+            from generadores.congruencial import congruencial_lineal
+        semilla = parametros.get("semilla", parametros.get("seed", 1))
+        a = parametros["a"]
+        c = parametros["c"]
+        m = parametros["m"]
+        enteros = congruencial_lineal(seed=semilla, a=a, c=c, m=m, count=cantidad)
+        return uniforme_desde_enteros(enteros, m)
+
+    elif metodo == "congruencial_multiplicativo":
+        try:
+            from src.generadores.congruencial import congruencial_multiplicativo
+        except ImportError:
+            from generadores.congruencial import congruencial_multiplicativo
+        semilla = parametros.get("semilla", parametros.get("seed", 1))
+        a = parametros["a"]
+        m = parametros["m"]
+        enteros = congruencial_multiplicativo(seed=semilla, a=a, m=m, count=cantidad)
+        return uniforme_desde_enteros(enteros, m)
+
+    else:
+        raise ValueError(f"Método '{metodo}' no reconocido o no soportado.")
+
+
+def generar_normal(metodo_base: str, parametros: dict, cantidad: int, mu: float = 0.0, sigma: float = 1.0) -> list[float]:
+    """Genera una lista de `cantidad` números normales N(mu, sigma²) vía Box-Muller."""
+    if cantidad <= 0:
+        return []
+    n_necesarios = cantidad + (cantidad % 2)
+    uniformes = generar_uniforme(metodo_base, parametros, n_necesarios)
+    normales = normal_box_muller(uniformes, mu=mu, sigma=sigma)
+    return normales[:cantidad]
