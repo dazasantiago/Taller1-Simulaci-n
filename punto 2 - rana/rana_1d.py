@@ -72,7 +72,10 @@ RUTA_PUNTO_3 = os.path.join(
 sys.path.insert(0, RUTA_PUNTO_3)
 
 # Generadores
-from generadores.congruencial import congruencial_multiplicativo
+from generadores.congruencial import (
+    congruencial_lineal,
+    congruencial_multiplicativo,
+)
 from generadores.cuadrados_medios import cuadrados_medios
 
 # Distribuciones
@@ -139,25 +142,6 @@ class GeneradorConectado:
 
 # 2. CONFIGURACIÓN DE GENERADORES
 def crear_generador(semilla, tipo="cuadrados_medios"):
-    """Crea un generador conectado a la caminata.
-
-    Parámetros
-    ----------
-    semilla : int
-        Semilla inicial.
-    tipo : str, opcional (default="cuadrados_medios")
-        Tipo de generador: "cuadrados_medios" o "multiplicativo".
-
-    Retorna
-    -------
-    GeneradorConectado
-        Objeto con método `.siguiente_lote(cantidad)`.
-
-    Lanza
-    -----
-    ValueError
-        Si el tipo de generador no es reconocido.
-    """
     if tipo == "cuadrados_medios":
         n_digitos = 4
         m = 10 ** n_digitos
@@ -169,10 +153,24 @@ def crear_generador(semilla, tipo="cuadrados_medios"):
             semilla=semilla % m,
             n_digitos=n_digitos,
         )
+    elif tipo == "lineal":
+        m = 2 ** 31
+        a = 1103515245
+        c = 12345
+        s = semilla % m
+        return GeneradorConectado(
+            funcion=congruencial_lineal,
+            modulo=m,
+            nombre_cantidad="count",
+            nombre_semilla="seed",
+            seed=s,
+            a=a,
+            c=c,
+            m=m,
+        )
     elif tipo == "multiplicativo":
         m = 2 ** 31
         a = 1103515245
-        # El multiplicativo no acepta semilla múltiplo de m (degenera en ceros).
         s = semilla % m
         if s == 0:
             s = 1
@@ -188,7 +186,7 @@ def crear_generador(semilla, tipo="cuadrados_medios"):
     else:
         raise ValueError(
             f"Generador '{tipo}' no reconocido. "
-            "Use 'cuadrados_medios' o 'multiplicativo'."
+            "Use 'cuadrados_medios', 'lineal' o 'multiplicativo'."
         )
 
 
@@ -543,8 +541,8 @@ def main(argv=None):
     p.add_argument("--n_pasos", type=int, default=1_000_000)
     p.add_argument("--n_lote", type=int, default=1000)
     p.add_argument("--generador", default="cuadrados_medios",
-                   choices=["cuadrados_medios", "multiplicativo"],
-                   help="Tipo de generador a usar.")
+               choices=["cuadrados_medios", "lineal", "multiplicativo"],
+               help="Tipo de generador a usar.")
     p.add_argument("--archivo_semillas", default=None)
     p.add_argument("--salida", default="outputs")
     p.add_argument("--solo_verificar", action="store_true")
