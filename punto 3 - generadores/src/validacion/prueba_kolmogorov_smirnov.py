@@ -1,17 +1,23 @@
+"""Prueba de Kolmogorov-Smirnov sobre una secuencia pseudoaleatoria (lógica pura)."""
 from scipy.stats import kstwo
 
-
-ALPHA = 0.05
-def get_ks_critical_value(n):
-    return float(kstwo.ppf(1 - ALPHA, n))
+ALPHA_DEFAULT = 0.05
 
 
-def ks_test(sequence, k=10, alpha=0.05):
+def get_ks_critical_value(n: int, alpha: float = ALPHA_DEFAULT) -> float:
+    return float(kstwo.ppf(1 - alpha, n))
+
+
+def ks_test(sequence: list[float], k: int = 10, alpha: float = ALPHA_DEFAULT) -> dict:
+    """Ejecuta la prueba de Kolmogorov-Smirnov sobre una secuencia en [0, 1)."""
     n = len(sequence)
+    if n == 0:
+        raise ValueError("La secuencia no puede estar vacía.")
+
     mean = sum(sequence) / n
     minimum = min(sequence)
     maximum = max(sequence)
-    step = (maximum - minimum) / k
+    step = (maximum - minimum) / k if maximum > minimum else 1.0 / k
 
     intervals = []
     for i in range(k):
@@ -74,16 +80,21 @@ def ks_test(sequence, k=10, alpha=0.05):
         })
 
     d_max = max(differences)
-    d_max_p = get_ks_critical_value(n)
+    d_max_p = get_ks_critical_value(n, alpha=alpha)
     passed_test = d_max <= d_max_p
 
     result = {
+        "statistic": d_max,
         "d_max": d_max,
         "critical_value": d_max_p,
+        "alpha": alpha,
+        "n": n,
+        "k": k,
         "minimum": minimum,
         "maximum": maximum,
         "mean": mean,
         "passed_test": passed_test,
+        "passes_test": passed_test,
         "intervals_table": intervals_table,
         # Spanish backward-compatibility keys
         "valor_critico": d_max_p,
@@ -94,3 +105,4 @@ def ks_test(sequence, k=10, alpha=0.05):
 
 
 prueba_ks = ks_test
+
