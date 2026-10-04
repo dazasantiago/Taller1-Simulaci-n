@@ -4,7 +4,6 @@ import pickle
 import time
 
 from src import configuracion, estudio, graficas
-from src.generadores import generador_temporal
 
 SEMILLA_BASE = 12345
 CARPETA_SALIDA = "outputs"
@@ -24,10 +23,10 @@ def main():
     inicio = time.time()
 
     resultados_sin_vacunacion = estudio.correr_estudio(
-        parametros, generador_temporal, SEMILLA_BASE, n_simulaciones, forzar_sin_vacunacion=True
+        parametros, SEMILLA_BASE, n_simulaciones, forzar_sin_vacunacion=True
     )
     resultados_con_vacunacion = estudio.correr_estudio(
-        parametros, generador_temporal, SEMILLA_BASE + 10_000_000, n_simulaciones, forzar_sin_vacunacion=False
+        parametros, SEMILLA_BASE + 10_000_000, n_simulaciones, forzar_sin_vacunacion=False
     )
 
     duracion_segundos = time.time() - inicio

@@ -231,3 +231,10 @@ Taller1/
 - `docs/README.md`: contrato de cada función (firma, parámetros, tipo
   de retorno) y convenciones a respetar para que el módulo sea
   reutilizable por los próximos proyectos.
+
+## Nota sobre el uso de herramientas de inteligencia artificial
+
+Claude (Anthropic) ayudó a reescribir las pruebas de validación de Chi-cuadrado,
+Póker y Rachas (`src/validacion/prueba_chi_cuadrado.py`, `prueba_poker.py`,
+`prueba_rachas.py`) en una versión más lineal y sin dependencias avanzadas de
+Python, bajo dirección del estudiante en cada decisión de diseño.

@@ -1,4 +1,5 @@
 from src import simulacion
+from src.generador_adaptador import GeneradorMonteCarlo
 
 NOMBRES_PARAMETROS_SENSIBILIDAD = (
     "beta",
@@ -10,12 +11,12 @@ NOMBRES_PARAMETROS_SENSIBILIDAD = (
 )
 
 
-def correr_estudio(configuracion, modulo_generador, semilla_base, n_simulaciones, forzar_sin_vacunacion=False):
+def correr_estudio(configuracion, semilla_base, n_simulaciones, forzar_sin_vacunacion=False):
     resultados = []
     for i in range(n_simulaciones):
-        modulo_generador.inicializar(semilla_base + i)
+        generador = GeneradorMonteCarlo(semilla_base + i)
         resultado = simulacion.correr_una_simulacion(
-            configuracion, modulo_generador.siguiente_uniforme, forzar_sin_vacunacion
+            configuracion, generador.siguiente_uniforme, forzar_sin_vacunacion
         )
         resultados.append(resultado)
     return resultados
