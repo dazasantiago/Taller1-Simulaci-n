@@ -37,10 +37,11 @@ class GeneradorMonteCarlo:
         self.m = m
         self.lote = lote
         self.buffer: list[float] = []
+        self.indice = 0
 
     def siguiente_uniforme(self) -> float:
         """Genera el siguiente número pseudoaleatorio uniforme en [0, 1)."""
-        if not self.buffer:
+        if self.indice >= len(self.buffer):
             enteros = congruencial_lineal(
                 seed=self.semilla,
                 a=self.a,
@@ -50,4 +51,7 @@ class GeneradorMonteCarlo:
             )
             self.semilla = enteros[-1]
             self.buffer = uniforme_desde_enteros(enteros, self.m)
-        return self.buffer.pop(0)
+            self.indice = 0
+        valor = self.buffer[self.indice]
+        self.indice += 1
+        return valor

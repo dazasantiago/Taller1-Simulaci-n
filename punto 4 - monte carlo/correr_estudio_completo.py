@@ -1,6 +1,7 @@
 import json
 import os
 import pickle
+import sys
 import time
 
 from src import configuracion, estudio, graficas
@@ -14,28 +15,40 @@ def guardar_figura(figura, nombre):
     figura.savefig(ruta, dpi=150, bbox_inches="tight")
 
 
-def main():
+def ruta_pickle(nombre):
+    return os.path.join(CARPETA_SALIDA, f"resultados_{nombre}.pkl")
+
+
+def correr_escenario(nombre, forzar_sin_vacunacion, semilla_base):
     os.makedirs(CARPETA_SALIDA, exist_ok=True)
+    ruta = ruta_pickle(nombre)
+    if os.path.exists(ruta):
+        print(f"{nombre}: ya existe {ruta}, no se vuelve a correr")
+        return
 
     parametros = configuracion.parametros_por_defecto()
     n_simulaciones = parametros["n_simulaciones"]
 
     inicio = time.time()
+    resultados = estudio.correr_estudio(parametros, semilla_base, n_simulaciones, forzar_sin_vacunacion)
+    duracion = time.time() - inicio
 
-    resultados_sin_vacunacion = estudio.correr_estudio(
-        parametros, SEMILLA_BASE, n_simulaciones, forzar_sin_vacunacion=True
-    )
-    resultados_con_vacunacion = estudio.correr_estudio(
-        parametros, SEMILLA_BASE + 10_000_000, n_simulaciones, forzar_sin_vacunacion=False
-    )
+    with open(ruta, "wb") as archivo:
+        pickle.dump(resultados, archivo)
 
-    duracion_segundos = time.time() - inicio
+    with open(os.path.join(CARPETA_SALIDA, f"duracion_{nombre}.json"), "w", encoding="utf-8") as archivo:
+        json.dump({"duracion_segundos": duracion}, archivo)
 
-    with open(os.path.join(CARPETA_SALIDA, "resultados_sin_vacunacion.pkl"), "wb") as archivo:
-        pickle.dump(resultados_sin_vacunacion, archivo)
-    with open(os.path.join(CARPETA_SALIDA, "resultados_con_vacunacion.pkl"), "wb") as archivo:
-        pickle.dump(resultados_con_vacunacion, archivo)
+    print(f"{nombre}: {n_simulaciones} simulaciones en {duracion:.1f} segundos, guardado en {ruta}")
 
+
+def finalizar():
+    with open(ruta_pickle("sin_vacunacion"), "rb") as archivo:
+        resultados_sin_vacunacion = pickle.load(archivo)
+    with open(ruta_pickle("con_vacunacion"), "rb") as archivo:
+        resultados_con_vacunacion = pickle.load(archivo)
+
+    parametros = configuracion.parametros_por_defecto()
     dias = list(range(parametros["dias_simulacion"]))
 
     curvas = {}
@@ -101,10 +114,15 @@ def main():
     fila_sin["escenario"] = "Sin vacunación"
     fila_con["escenario"] = "Con vacunación"
 
+    duracion_total = 0
+    for nombre in ("sin_vacunacion", "con_vacunacion"):
+        with open(os.path.join(CARPETA_SALIDA, f"duracion_{nombre}.json"), encoding="utf-8") as archivo:
+            duracion_total += json.load(archivo)["duracion_segundos"]
+
     resumen = {
         "semilla_base": SEMILLA_BASE,
-        "n_simulaciones_por_escenario": n_simulaciones,
-        "duracion_segundos": duracion_segundos,
+        "n_simulaciones_por_escenario": parametros["n_simulaciones"],
+        "duracion_segundos": duracion_total,
         "estadisticas_sin_vacunacion": fila_sin,
         "estadisticas_con_vacunacion": fila_con,
         "sensibilidad_total_infectados": filas_sensibilidad_infectados,
@@ -114,9 +132,19 @@ def main():
     with open(os.path.join(CARPETA_SALIDA, "resumen_estudio.json"), "w", encoding="utf-8") as archivo:
         json.dump(resumen, archivo, indent=2, ensure_ascii=False)
 
-    print(f"Estudio completo terminado en {duracion_segundos:.1f} segundos")
-    print(f"Resultados guardados en {CARPETA_SALIDA}/")
+    print(f"Resultados finales guardados en {CARPETA_SALIDA}/")
 
 
 if __name__ == "__main__":
-    main()
+    modo = sys.argv[1] if len(sys.argv) > 1 else "todo"
+
+    if modo == "sin_vacunacion":
+        correr_escenario("sin_vacunacion", True, SEMILLA_BASE)
+    elif modo == "con_vacunacion":
+        correr_escenario("con_vacunacion", False, SEMILLA_BASE + 10_000_000)
+    elif modo == "finalizar":
+        finalizar()
+    else:
+        correr_escenario("sin_vacunacion", True, SEMILLA_BASE)
+        correr_escenario("con_vacunacion", False, SEMILLA_BASE + 10_000_000)
+        finalizar()
