@@ -2,7 +2,7 @@
 
 Simulación de caminatas aleatorias simétricas en 1D por lotes encadenados.
 Usa los generadores del Punto 3 (`cuadrados_medios`, `lineal`,
-`multiplicativo`) y sus pruebas de validación.
+`multiplicativo`) y las pruebas de validación.
 
 Este README cubre **únicamente el apartado "Simulación computacional
 unidimensional"** del taller, en el orden en que lo pide el enunciado.
@@ -23,39 +23,40 @@ automáticamente. No hay que instalarlos por separado.
 
 ---
 
-## Orden de ejecución (según el taller)
+## Ejecución y parámetros
 
-### Paso 1 — Implementar el programa que simula hasta el millonésimo salto
+### Implementar el programa que simula hasta el millonésimo salto
 
-El programa ya está implementado en `rana_1d.py`. Corre la simulación
-oficial con:
+cd "punto 2 - rana" (estar en la carpeta del punto 2)
 
-    cd "punto 2 - rana"
+Se ejecuta este literal del taller con el comando:
+
+    
     python rana_1d.py --generador multiplicativo --n_pasos 1000000 --n_rep 100
 
-Esto simula 100 réplicas × 1.000.000 de pasos con el generador
+Esto simula 100 réplicas cada una de 1.000.000 de pasos con el generador
 multiplicativo. Guarda:
 
 - `outputs/histograma_1d.png`
 - `outputs/finales_1d.csv`
 
-### Paso 2 — Modificar la semilla del generador
+### Modificar la semilla del generador
 
 La semilla se cambia con `--semilla`:
 
     python rana_1d.py --semilla 777 --n_pasos 1000000 --n_rep 100
 
-Las 100 réplicas usan semillas Weyl derivadas de la semilla base. Cada
+Las 100 réplicas usan semillas derivadas de la semilla base. Cada
 réplica es independiente.
 
-### Paso 3 — Replicar múltiples simulaciones independientes (al menos 100)
+### Replicar múltiples simulaciones independientes (mínimo)
 
 El número de réplicas se cambia con `--n_rep`:
 
     python rana_1d.py --n_rep 100     # mínimo del taller
     python rana_1d.py --n_rep 500     # más réplicas para histograma suave
 
-### Paso 4 — Generar el histograma de posiciones finales
+### Para generar el histograma de posiciones finales de las replicas
 
 El histograma se genera automáticamente en cada corrida:
 
@@ -64,14 +65,16 @@ El histograma se genera automáticamente en cada corrida:
 Resultado: `outputs/histograma_1d.png` con las posiciones finales +
 curva normal teórica.
 
-### Paso 5 — Añadir trayectorias (opcional, evidencia visual)
+### Visualización de trayectorias (trazas de simulación) 
+
+La trayectoria para la simulación se obtiene añadiendo el parámetro
 
     python rana_1d.py --generador multiplicativo --n_pasos 1000000 --n_rep 100 --trayectorias
 
 Resultado adicional: `outputs/trayectorias_1d.png` con 10 trayectorias
 de ejemplo.
 
-### Paso 6 — Validar el conjunto (generador + distribuciones + caminata)
+### Validación el conjunto (generador + distribuciones + caminata)
 
 Corre las 6 pruebas del Punto 3 sobre los uniformes del generador, y
 valida la caminata (media, σ, paridad):
@@ -80,19 +83,13 @@ valida la caminata (media, σ, paridad):
 
 Resultado esperado: `TODO OK`.
 
-### Paso 7 — Verificar equivalencia lotes vs. continuo
-
-Confirma que la estrategia de lotes encadenados es correcta:
-
-    python rana_1d.py --solo_verificar --generador multiplicativo
-
-Resultado esperado: `OK, equivalentes`.
-
 ---
+## Comando de ejecución completo para 1D
 
-## Comando todo-en-uno (la corrida oficial)
+Para ejecutar lo solicitado por el apartado de 1D :
+- Implementen un programa que simule el comportamiento de la rana hasta el millonésimo salto en una dimensión.
 
-Si solo quieres la corrida completa del taller:
+- El programa debe permitir modificar la semilla del generador aleatorio y replicar múltiples simulaciones independientes (al menos 100).
 
     cd "punto 2 - rana"
     python rana_1d.py --generador multiplicativo --n_pasos 1000000 --n_rep 100 --trayectorias
@@ -105,7 +102,7 @@ Eso produce todo lo que pide el apartado 1D.
 
 | Argumento | Tipo | Default | Descripción |
 |---|---|---|---|
-| `--semilla` | int | `12345` | Semilla base. Las réplicas usan semillas Weyl derivadas. |
+| `--semilla` | int | `12345` | Semilla base. Las réplicas usan semillas derivadas. |
 | `--n_rep` | int | `100` | Número de réplicas independientes. |
 | `--n_pasos` | int | `1_000_000` | Pasos por réplica. |
 | `--n_lote` | int | `1000` | Tamaño de cada lote. |
@@ -122,9 +119,9 @@ Eso produce todo lo que pide el apartado 1D.
 
 | Nombre | Estado | ¿Pasa las 6 pruebas? | Firma |
 |---|---|---|---|
-| `cuadrados_medios` | ✅ Conectado | `(semilla, n_digitos, cantidad)` |
-| `lineal` | ✅ Conectado | ✅ Pasa las 6 pruebas | `(seed, a, c, m, count)` |
-| `multiplicativo` | ✅ Conectado | ✅ Pasa las 6 pruebas | `(seed, a, m, count)` |
+| `cuadrados_medios` | Conectado | `(semilla, n_digitos, cantidad)` |
+| `lineal` | Conectado | Pasa las 6 pruebas | `(seed, a, c, m, count)` |
+| `multiplicativo` | Conectado | Pasa las 6 pruebas | `(seed, a, m, count)` |
 
 **Recomendación**: usa `multiplicativo` para la corrida oficial. `lineal`
 también funciona pero el multiplicativo suele dar mejores resultados
@@ -301,28 +298,3 @@ modificar es `crear_generador` dentro de `rana_1d.py`.
 
 ---
 
-## Notas para la extensión a 2D y 3D
-
-Para generalizar a 2D y 3D:
-
-1. La posición pasa de `int` a vector.
-2. El paso pasa de `+1/-1` a vector unitario aleatorio.
-3. El histograma solo aplica en 1D. En 2D/3D se usan scatter plots.
-4. La paridad solo aplica en 1D.
-5. La lógica de lotes encadenados es idéntica en todas las dimensiones.
-
----
-
-## Resumen del estado del apartado 1D
-
-| Requisito del taller | Estado |
-|---|---|
-| Programa que simule hasta el millonésimo salto | ✅ |
-| Permite modificar la semilla | ✅ |
-| Al menos 100 réplicas independientes | ✅ |
-| Validación estadística del generador | ✅ |
-| Visualización (histograma) | ✅ |
-| Evidencia visual (trayectorias) | ✅ |
-| Estrategia de lotes encadenados | ✅ |
-| Equivalencia lotes vs. continuo | ✅ |
-| Tres generadores conectados | ✅ |

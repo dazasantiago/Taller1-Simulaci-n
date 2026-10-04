@@ -534,14 +534,14 @@ def main(argv=None):
     ----------
     argv : list[str] | None
         Argumentos CLI. Si es None, parsea sys.argv ignorando argumentos
-        desconocidos (útil en Colab).
+        desconocidos.
     """
     p = argparse.ArgumentParser(description="Caminata aleatoria 1D por lotes.")
     p.add_argument("--semilla", type=int, default=12345)
     p.add_argument("--n_rep", type=int, default=100)
     p.add_argument("--n_pasos", type=int, default=1_000_000)
     p.add_argument("--n_lote", type=int, default=1000)
-    p.add_argument("--generador", default="cuadrados_medios",
+    p.add_argument("--generador", default="multiplicativo",
                choices=["cuadrados_medios", "lineal", "multiplicativo"],
                help="Tipo de generador a usar.")
     p.add_argument("--archivo_semillas", default=None)
