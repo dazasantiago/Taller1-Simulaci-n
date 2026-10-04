@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import streamlit as st
 from matplotlib.figure import Figure
 
-from app import catalogo, estado
+from app import catalogo, estado, graficas
 
 _LLAVES_FIGURA = ("figure", "figura")
 _LLAVES_VEREDICTO = ("passes_test", "pasa_prueba")
@@ -27,7 +28,7 @@ def _formatear(valor) -> str:
     return str(valor)
 
 
-def _mostrar_resultado(resultado: dict) -> None:
+def _mostrar_resultado(resultado: dict, id_prueba: str = "", secuencia: list[float] | None = None) -> None:
     if "error" in resultado:
         st.error(f"La prueba falló: {resultado['error']}")
         return
@@ -55,10 +56,10 @@ def _mostrar_resultado(resultado: dict) -> None:
         with st.expander(llave):
             st.write(valor)
 
-    for llave in _LLAVES_FIGURA:
-        if isinstance(resultado.get(llave), Figure):
-            st.pyplot(resultado[llave])
-            break
+    figura = graficas.obtener_figura(id_prueba, resultado, secuencia=secuencia)
+    if isinstance(figura, Figure):
+        st.pyplot(figura)
+        plt.close(figura)
 
 
 @st.dialog("Seleccionar pruebas")
@@ -113,9 +114,9 @@ def _dialogo_resultados(id_secuencia: str) -> None:
     etiquetas = {p.id: p.etiqueta for p in catalogo.PRUEBAS}
     resultados = secuencia["resultados"]
     pestanas = st.tabs([etiquetas[pid] for pid in resultados])
-    for pestana, resultado in zip(pestanas, resultados.values()):
+    for pestana, (pid, resultado) in zip(pestanas, resultados.items()):
         with pestana:
-            _mostrar_resultado(resultado)
+            _mostrar_resultado(resultado, id_prueba=pid, secuencia=secuencia.get("valores"))
 
 
 def _estado_pruebas(secuencia: dict) -> str:

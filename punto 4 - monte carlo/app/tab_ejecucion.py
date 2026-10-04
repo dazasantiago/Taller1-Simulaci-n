@@ -4,7 +4,7 @@ import streamlit as st
 
 from app import estado
 from src import simulacion
-from src.generadores import generador_temporal
+from src.generador_adaptador import GeneradorMonteCarlo
 
 
 def mostrar():
@@ -30,18 +30,18 @@ def mostrar():
 
         resultados_sin_vacunacion = []
         for i in range(n_simulaciones):
-            generador_temporal.inicializar(semilla + i)
+            gen_sin_vac = GeneradorMonteCarlo(semilla + i)
             resultado = simulacion.correr_una_simulacion(
-                parametros, generador_temporal.siguiente_uniforme, forzar_sin_vacunacion=True
+                parametros, gen_sin_vac.siguiente_uniforme, forzar_sin_vacunacion=True
             )
             resultados_sin_vacunacion.append(resultado)
             barra.progress((i + 1) / total_corridas)
 
         resultados_con_vacunacion = []
         for i in range(n_simulaciones):
-            generador_temporal.inicializar(semilla + 10_000_000 + i)
+            gen_con_vac = GeneradorMonteCarlo(semilla + 10_000_000 + i)
             resultado = simulacion.correr_una_simulacion(
-                parametros, generador_temporal.siguiente_uniforme, forzar_sin_vacunacion=False
+                parametros, gen_con_vac.siguiente_uniforme, forzar_sin_vacunacion=False
             )
             resultados_con_vacunacion.append(resultado)
             barra.progress((n_simulaciones + i + 1) / total_corridas)
@@ -50,3 +50,4 @@ def mostrar():
 
         duracion_segundos = time.time() - inicio
         st.success(f"Estudio terminado en {duracion_segundos:.1f} segundos. Ve a «Resultados».")
+

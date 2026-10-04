@@ -47,6 +47,3 @@ htmlcov/
 
 # === Configuración local de Claude Code (no compartida con el equipo) ===
 CLAUDE.md
-
-# === Generador temporal de Punto 4 (borrar cuando Punto 3 esté implementado) ===
-punto 4 - monte carlo/src/generadores/generador_temporal.py
