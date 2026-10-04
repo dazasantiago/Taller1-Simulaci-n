@@ -1,4 +1,4 @@
-"""Simulación 1D de la rana (caminata aleatoria simétrica) por lotes encadenados.
+"""Simulación 1D de la rana por lotes encadenados.
 
 Descripción general
 -------------------
@@ -7,15 +7,16 @@ la rana parte del origen (posición 0) y en cada paso se mueve +1 o -1 con
 idéntica probabilidad (0.5 cada uno). Tras `n_pasos` se registra la posición
 final, y se repite el experimento `n_rep` veces con semillas distintas.
 
-Estrategia de simulación (aprobada por el profesor)
+Estrategia de simulación
 ---------------------------------------------------
 La caminata se simula por LOTES encadenados. El estado que pasa de un lote
 al siguiente es:
     1. Posición final del lote anterior  -> posición inicial del siguiente.
-    2. Estado interno del generador      -> continúa la secuencia pseudoaleatoria.
-    3. Flag "ya pasó por el origen"      -> se arrastra entre lotes.
-Esto garantiza que correr en 1 lote grande o en muchos lotes pequeños dé
-exactamente el mismo resultado (ver `verificar()`).
+    2. Estado interno del generador      -> continúa la secuencia pseudoaleatoria del generador.
+    3. Flag que marca si ya pasó por el origen"      -> se arrastra entre lotes.
+
+Encadenar los lotes y mantener el estado del generador entre iteraciones 
+permite simular una sola repeticion de la caminata sin necesidad de generar todos los pasos de una vez.
 
 Arquitectura
 ------------
@@ -24,9 +25,8 @@ Arquitectura
 - La caminata usa los Ri para decidir cada paso (+1 si Ri < 0.5, -1 si no).
 - Las pruebas de validación validan los uniformes generados.
 
-El wrapper `GeneradorConectado` es el punto de unión entre el generador
-y la caminata. Se adapta a los nombres de los parámetros de
-cada generador.
+El wrapper `GeneradorConectado`  permite unir el generador
+y la caminata. Adaptandose a los nombres de los parámetros de cada generador.
 
 Convenciones y notación
 -----------------------
@@ -90,7 +90,6 @@ from validacion.prueba_rachas import runs_test
 from validacion.prueba_varianza import variance_test
 
 # 1. WRAPPER DE GENERADORES
-
 class GeneradorConectado:
     """Envuelve un generador para que la caminata lo use.
 
@@ -98,15 +97,19 @@ class GeneradorConectado:
     --------------------------
     funcion : 
         Función generadora. Debe aceptar `**kwargs`.
+
     modulo : int
         Módulo del generador. Se usa para normalizar Xi -> Ri.
+
     nombre_cantidad : str, opcional (default="cantidad")
         Nombre del parámetro que indica cuántos valores generar.
+
     nombre_semilla : str, opcional (default="semilla")
         Nombre del parámetro que guarda el estado (semilla).
+
     **parametros : dict
         Parámetros fijos del generador (a, c, m, n_digitos, etc.).
-        Deben incluir la semilla inicial con el nombre `nombre_semilla`.
+        se debe incluir la semilla inicial con el nombre `nombre_semilla`.
     """
 
     def __init__(self, funcion, modulo, nombre_cantidad="cantidad",
@@ -137,7 +140,6 @@ class GeneradorConectado:
         # Encadenamiento: el último entero es la nueva semilla.
         self.parametros[self.nombre_semilla] = enteros[-1]
         return uniforme_desde_enteros(enteros, self.m)
-
 
 
 # 2. CONFIGURACIÓN DE GENERADORES
@@ -189,19 +191,18 @@ def crear_generador(semilla, tipo="cuadrados_medios"):
             "Use 'cuadrados_medios', 'lineal' o 'multiplicativo'."
         )
 
-
 # 3. SEMILLAS
 def semillas_desde_base(semilla_base, n_rep):
-    """Genera `n_rep` semillas separadas por la constante de Weyl.
+    """Genera `n_rep` semillas.
 
     Parámetros
     ----------
-    semilla_base : int
-    n_rep : int
+        semilla_base : int
+        n_rep : int
 
     Retorna
     -------
-    list[int]
+        list[int]
     """
     return [(semilla_base + i * 2654435761) % 2**32 for i in range(n_rep)]
 
@@ -211,12 +212,12 @@ def semillas_desde_archivo(ruta, n_rep):
 
     Parámetros
     ----------
-    ruta : str
-    n_rep : int
+        ruta : str
+        n_rep : int
 
     Retorna
     -------
-    list[int]
+        list[int]
     """
     with open(ruta, encoding="utf-8") as f:
         texto = f.read().replace(",", " ").replace(";", " ")
@@ -233,18 +234,18 @@ def avanzar_lote(gen, pos, visito, n_lote, paso_inicio, marca=1000):
 
     Parámetros
     ----------
-    gen : GeneradorConectado
-    pos : int
-    visito : bool
-    n_lote : int
-    paso_inicio : int
-    marca : int, opcional (default=1000)
+        gen : GeneradorConectado
+        pos : int
+        visito : bool
+        n_lote : int
+        paso_inicio : int
+        marca : int, opcional (default=1000)
 
     Retorna
     -------
-    nueva_pos : int
-    nuevo_visito : bool
-    registro : tuple(int, bool) | None
+        nueva_pos : int
+        nuevo_visito : bool
+        registro : tuple(int, bool) | None
     """
     u = np.asarray(gen.siguiente_lote(n_lote))
     pasos = np.where(u < 0.5, 1, -1)
@@ -299,17 +300,17 @@ def simular(semillas, n_pasos, n_lote, marca=1000, tipo="cuadrados_medios"):
 
     Parámetros
     ----------
-    semillas : list[int]
-    n_pasos : int
-    n_lote : int
-    marca : int, opcional (default=1000)
-    tipo : str, opcional (default="cuadrados_medios")
+        semillas : list[int]
+        n_pasos : int
+        n_lote : int
+        marca : int, opcional (default=1000)
+        tipo : str, opcional (default="cuadrados_medios")
 
     Retorna
     -------
-    finales : np.ndarray[int]
-    pos_marca : np.ndarray[int]
-    visito_marca : np.ndarray[bool]
+        finales : np.ndarray[int]
+        pos_marca : np.ndarray[int]
+        visito_marca : np.ndarray[bool]
     """
     finales, pos_marca, visito_marca = [], [], []
     for s in semillas:
@@ -328,9 +329,9 @@ def verificar(semilla=12345, n_pasos=5000, tipo="cuadrados_medios"):
 
     Parámetros
     ----------
-    semilla : int, opcional (default=12345)
-    n_pasos : int, opcional (default=5000)
-    tipo : str, opcional (default="cuadrados_medios")
+        semilla : int, opcional (default=12345)
+        n_pasos : int, opcional (default=5000)
+        tipo : str, opcional (default="cuadrados_medios")
 
     Retorna
     -------
@@ -363,9 +364,9 @@ def validar_conjunto(semilla=12345, cantidad=10000, tipo="cuadrados_medios"):
 
     Parámetros
     ----------
-    semilla : int, opcional (default=12345)
-    cantidad : int, opcional (default=10000)
-    tipo : str, opcional (default="cuadrados_medios")
+        semilla : int, opcional (default=12345)
+        cantidad : int, opcional (default=10000)
+        tipo : str, opcional (default="cuadrados_medios")
 
     Retorna
     -------
