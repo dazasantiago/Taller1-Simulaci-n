@@ -1,5 +1,3 @@
-"""Pestaña "Validación": secuencias en memoria agrupadas por método y sus pruebas."""
-
 from __future__ import annotations
 
 import matplotlib.pyplot as plt
