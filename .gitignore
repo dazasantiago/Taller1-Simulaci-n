@@ -42,12 +42,11 @@ Thumbs.db
 .coverage
 htmlcov/
 
-# === Streamlit (config/secretos locales; no deben subirse al repo) ===
+# === Streamlit ===
 .streamlit/
 
 # === Configuración local de Claude Code (no compartida con el equipo) ===
 CLAUDE.md
 
-# === Enunciado del taller y documentación consolidada (no son entregables de código) ===
-SC_1er50.md
-punto 4 - monte carlo/Informe_Punto4_EpiSim.docx
+# === Generador temporal de Punto 4 (borrar cuando Punto 3 esté implementado) ===
+punto 4 - monte carlo/src/generadores/generador_temporal.py

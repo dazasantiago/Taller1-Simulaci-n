@@ -110,6 +110,5 @@ configuracion_ejemplo.csv
 ## Nota sobre el uso de herramientas de inteligencia artificial
 
 Claude (Anthropic) ayudó en el desarrollo de la interfaz Streamlit de este punto
-(las 4 pestañas y el manejo de sesión), en la implementación de la lógica de
-simulación en `src/` bajo dirección del estudiante en cada decisión de diseño, y en
-parte de la documentación técnica (este README y el informe en Word).
+(las 4 pestañas y el manejo de sesión) y en
+parte de la documentación técnica (este README).
