@@ -47,3 +47,7 @@ htmlcov/
 
 # === Configuración local de Claude Code (no compartida con el equipo) ===
 CLAUDE.md
+
+# === Enunciado del taller y documentación consolidada (no son entregables de código) ===
+SC_1er50.md
+punto 4 - monte carlo/Informe_Punto4_EpiSim.docx
