@@ -39,6 +39,7 @@ def mostrar():
     st.write("Rango de p (probabilidad de transmisión):", parametros["rango_p_transmision"])
     st.write("Rango de tasa de vacunación:", parametros["rango_tasa_vacunacion"])
     st.write("Rango de efectividad de la vacuna:", parametros["rango_efectividad_vacuna"])
+    st.write("Rango de tasa de mortalidad:", parametros["rango_tasa_mortalidad"])
 
     if st.button("Guardar configuración", type="primary"):
         estado.guardar_parametros(parametros, semilla)

@@ -24,11 +24,15 @@ def mostrar():
     st.pyplot(graficas.graficar_curva_epidemica(dias, curvas))
 
     st.subheader("Distribuciones")
-    columna_izquierda, columna_derecha = st.columns(2)
+    columna_izquierda, columna_centro, columna_derecha = st.columns(3)
 
     totales_infectados = []
     for resultado in resultados_con_vacunacion:
         totales_infectados.append(resultado["total_infectados"])
+
+    totales_muertes = []
+    for resultado in resultados_con_vacunacion:
+        totales_muertes.append(resultado["total_muertes"])
 
     dias_pico = []
     for resultado in resultados_con_vacunacion:
@@ -44,12 +48,15 @@ def mostrar():
         st.pyplot(graficas.graficar_histograma(totales_infectados, "Total de infectados", "Total de infectados"))
         st.pyplot(graficas.graficar_histograma(dias_pico, "Día del pico de infectados", "Día del pico"))
 
-    with columna_derecha:
+    with columna_centro:
         st.pyplot(graficas.graficar_histograma(magnitudes_pico, "Magnitud del pico de infectados", "Infectados en el pico"))
         if len(dias_control) > 0:
             st.pyplot(graficas.graficar_histograma(dias_control, "Días hasta el control del brote", "Día de control"))
         else:
             st.warning("Ninguna simulación controló el brote (I=0) dentro del horizonte de días.")
+
+    with columna_derecha:
+        st.pyplot(graficas.graficar_histograma(totales_muertes, "Total de muertes", "Total de muertes"))
 
     st.subheader("Comparación de escenarios")
     promedio_i_sin, _, _ = estudio.calcular_curva_promedio(resultados_sin_vacunacion, "historial_i")

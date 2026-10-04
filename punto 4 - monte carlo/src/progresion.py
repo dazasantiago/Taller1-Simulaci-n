@@ -1,13 +1,16 @@
 from src import poblacion
 
 
-def avanzar_infectados(estado, dias_restantes):
+def avanzar_infectados(estado, dias_restantes, fallecido, tasa_mortalidad, generador):
     for i in range(len(estado)):
         if estado[i] == poblacion.ESTADO_INFECTADO:
             dias_restantes[i] -= 1
             if dias_restantes[i] <= 0:
                 estado[i] = poblacion.ESTADO_REMOVIDO
                 dias_restantes[i] = 0
+                r_mortalidad = generador()
+                if r_mortalidad < tasa_mortalidad:
+                    fallecido[i] = True
 
 
 def avanzar_expuestos(estado, dias_restantes, dias_infeccioso):

@@ -1,8 +1,6 @@
 def generar_numero_contactos(beta, generador):
     r_contactos = generador()
-    if r_contactos < beta:
-        return 1
-    return 0
+    return int(r_contactos * beta)
 
 
 def elegir_susceptible(lista_susceptibles, generador):
