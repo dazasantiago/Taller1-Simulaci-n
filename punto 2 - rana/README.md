@@ -123,13 +123,6 @@ Eso produce todo lo que pide el apartado 1D.
 | `lineal` | Conectado | Pasa las 6 pruebas | `(seed, a, c, m, count)` |
 | `multiplicativo` | Conectado | Pasa las 6 pruebas | `(seed, a, m, count)` |
 
-**Recomendación**: usa `multiplicativo` para la corrida oficial. `lineal`
-también funciona pero el multiplicativo suele dar mejores resultados
-en las pruebas.
-
-`cuadrados_medios` se deja implementado como referencia y para análisis
-comparativo. Falla porque con solo 4 dígitos tiende a caer en ciclos
-cortos o en cero. Esto es un resultado válido y didáctico.
 
 ---
 

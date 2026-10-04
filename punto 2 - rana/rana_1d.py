@@ -261,7 +261,7 @@ def avanzar_lote(gen, pos, visito, n_lote, paso_inicio, marca=1000):
 
 
 def simular_replica(semilla, n_pasos, n_lote, marca=1000, guardar_tray=False,
-                    tipo="cuadrados_medios"):
+                    tipo="multiplicativo"):
     """Simula UNA réplica completa.
 
     Parámetros
@@ -271,7 +271,7 @@ def simular_replica(semilla, n_pasos, n_lote, marca=1000, guardar_tray=False,
     n_lote : int
     marca : int, opcional (default=1000)
     guardar_tray : bool, opcional (default=False)
-    tipo : str, opcional (default="cuadrados_medios")
+    tipo : str, opcional (default="multiplicativo")
 
     Retorna
     -------
@@ -295,7 +295,7 @@ def simular_replica(semilla, n_pasos, n_lote, marca=1000, guardar_tray=False,
     return pos, reg, trayectoria
 
 
-def simular(semillas, n_pasos, n_lote, marca=1000, tipo="cuadrados_medios"):
+def simular(semillas, n_pasos, n_lote, marca=1000, tipo="multiplicativo"):
     """Simula todas las réplicas.
 
     Parámetros
@@ -304,7 +304,7 @@ def simular(semillas, n_pasos, n_lote, marca=1000, tipo="cuadrados_medios"):
         n_pasos : int
         n_lote : int
         marca : int, opcional (default=1000)
-        tipo : str, opcional (default="cuadrados_medios")
+        tipo : str, opcional (default="multiplicativo")
 
     Retorna
     -------
@@ -324,14 +324,14 @@ def simular(semillas, n_pasos, n_lote, marca=1000, tipo="cuadrados_medios"):
 
 # 5. VERIFICACIÓN
 
-def verificar(semilla=12345, n_pasos=5000, tipo="cuadrados_medios"):
+def verificar(semilla=12345, n_pasos=5000, tipo="multiplicativo"):
     """Comprueba que lotes encadenados == corrida continua.
 
     Parámetros
     ----------
         semilla : int, opcional (default=12345)
         n_pasos : int, opcional (default=5000)
-        tipo : str, opcional (default="cuadrados_medios")
+        tipo : str, opcional (default="multiplicativo")
 
     Retorna
     -------
@@ -356,7 +356,7 @@ def _extraer_pasa(resultado):
     return None
 
 
-def validar_conjunto(semilla=12345, cantidad=10000, tipo="cuadrados_medios"):
+def validar_conjunto(semilla=12345, cantidad=10000, tipo="multiplicativo"):
     """Valida el conjunto generador + distribuciones + caminata.
 
     Corre las 6 pruebas del Punto 3 sobre los uniformes del generador,
@@ -366,7 +366,7 @@ def validar_conjunto(semilla=12345, cantidad=10000, tipo="cuadrados_medios"):
     ----------
         semilla : int, opcional (default=12345)
         cantidad : int, opcional (default=10000)
-        tipo : str, opcional (default="cuadrados_medios")
+        tipo : str, opcional (default="multiplicativo")
 
     Retorna
     -------
@@ -496,7 +496,7 @@ def graficar_histograma(finales, n_pasos, ruta):
 
 
 def graficar_trayectorias(semillas, n_pasos, n_lote, ruta, n_mostrar=10,
-                          tipo="cuadrados_medios"):
+                          tipo="multiplicativo"):
     """Dibuja unas pocas trayectorias.
 
     Parámetros
@@ -506,7 +506,7 @@ def graficar_trayectorias(semillas, n_pasos, n_lote, ruta, n_mostrar=10,
     n_lote : int
     ruta : str
     n_mostrar : int, opcional (default=10)
-    tipo : str, opcional (default="cuadrados_medios")
+    tipo : str, opcional (default="multiplicativo")
     """
     plt.figure(figsize=(10, 5))
     for s in semillas[:n_mostrar]:
