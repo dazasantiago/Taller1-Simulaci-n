@@ -1,5 +1,3 @@
-"""Pestaña "Generación": elegir un método, sus parámetros y semillas, y generar."""
-
 from __future__ import annotations
 
 import pandas as pd
@@ -10,7 +8,6 @@ from app import catalogo, estado, semillas
 
 
 def _campo(campo: catalogo.Campo, clave: str):
-    """Renderiza un number_input del tipo (int/float) que corresponda al campo."""
     entero = isinstance(campo.defecto, int)
     return st.number_input(
         campo.etiqueta,
@@ -24,7 +21,6 @@ def _campo(campo: catalogo.Campo, clave: str):
 
 
 def _entrada_semillas(clave: str, base: catalogo.Base) -> list[int] | None:
-    """Semillas manuales o importadas. Devuelve None si el texto es inválido."""
     if base.vectorial:
         st.caption(
             "En este método la semilla es un **vector**: todas las semillas "
@@ -97,7 +93,6 @@ def _formulario_generacion() -> None:
     lista = _entrada_semillas(clave, base)
 
     if st.button("Generar", type="primary", disabled=not lista, key=f"{clave}_generar"):
-        # Aditivo: un solo vector; los demás: una secuencia por semilla.
         entradas = [lista] if base.vectorial else lista
         generadas, fallos = 0, []
         with st.spinner("Generando..."):
@@ -145,7 +140,7 @@ def _secuencias_en_memoria() -> None:
             format_func=lambda s: f"{s['id']} · {s['metodo']} · {estado.descripcion(s)}",
         )
     with derecha:
-        st.write("")  # alinea el botón con el selectbox
+        st.write("")
         if st.button("Vaciar memoria"):
             estado.vaciar()
             st.rerun()

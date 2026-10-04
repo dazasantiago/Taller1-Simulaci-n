@@ -1,8 +1,3 @@
-"""Lectura de semillas desde texto manual o archivos .txt / .csv.
-
-Solo hace entrada/salida y validación de formato; no genera números.
-"""
-
 from __future__ import annotations
 
 import csv
@@ -11,7 +6,6 @@ import re
 
 
 def _a_entero(token: str) -> int:
-    """Convierte un token a entero no negativo (acepta '5735' y '5735.0')."""
     token = token.strip()
     try:
         valor = int(token)
@@ -29,10 +23,6 @@ def _a_entero(token: str) -> int:
 
 
 def parsear_texto(texto: str) -> list[int]:
-    """Semillas separadas por comas, punto y coma, espacios o saltos de línea.
-
-    Ignora líneas vacías y todo lo que siga a un '#' (comentarios).
-    """
     semillas: list[int] = []
     for linea in texto.splitlines():
         linea = linea.split("#", 1)[0]
@@ -59,8 +49,6 @@ def _leer_csv(texto: str) -> list[int]:
     if not filas:
         return []
 
-    # Con encabezado (alguna celda no numérica) se busca la columna 'semilla';
-    # sin encabezado se toma la primera columna.
     columna = 0
     if not all(_es_numero(c) for c in filas[0] if c.strip()):
         encabezado = [c.strip().lower() for c in filas[0]]
@@ -74,7 +62,6 @@ def _leer_csv(texto: str) -> list[int]:
 
 
 def leer_archivo(nombre: str, contenido: bytes) -> list[int]:
-    """Lee las semillas de un archivo subido. Lanza ValueError si el formato es inválido."""
     texto = contenido.decode("utf-8-sig")
     if nombre.lower().endswith(".csv"):
         semillas = _leer_csv(texto)
