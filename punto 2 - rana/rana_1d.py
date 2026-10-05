@@ -579,7 +579,7 @@ def main(argv=None):
     )
     t = time.perf_counter() - t0
 
-        resumir(finales, args.n_pasos)
+    resumir(finales, args.n_pasos)
     if len(pos_m):
         print(f"Retorno exacto en paso 1000: {np.mean(pos_m == 0):.4f} (teórico 0.0252)")
         print(f"Paso por el origen en ≤1000: {vis_m.mean():.4f} (teórico 0.9748)")
