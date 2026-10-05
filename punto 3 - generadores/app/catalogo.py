@@ -70,14 +70,7 @@ BASES = (
             Campo("m", "Módulo (m)", 2**31 - 1, 2),  # L'Ecuyer (1988), CACM
         ),
     ),
-    Base(
-        "congruencial_aditivo",
-        "Congruencial Aditivo",
-        "ADI",
-        "src.generadores.congruencial",
-        (Campo("m", "Módulo (m)", 2**31 - 1, 2),),
-        vectorial=True,
-    ),
+
 )
 
 
