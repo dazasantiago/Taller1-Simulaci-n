@@ -406,7 +406,7 @@ def validar_conjunto(semilla=12345, cantidad=10000, tipo="multiplicativo"):
           f"-> {'PASA' if pasa else 'FALLA'}")
 
     # 5. Póker
-    r = poker_test(u_lista, hand_size=5)
+    r = poker_test(u_lista)
     pasa = _extraer_pasa(r)
     resultados["poker"] = pasa
     print(f"5. Póker:      stat={r.get('statistic', 0):.4f}  "
