@@ -14,6 +14,7 @@ def sortear_parametros(configuracion, generador):
     p_transmision = sortear_parametro(configuracion["rango_p_transmision"], generador)
     tasa_vacunacion = sortear_parametro(configuracion["rango_tasa_vacunacion"], generador)
     efectividad_vacuna = sortear_parametro(configuracion["rango_efectividad_vacuna"], generador)
+    tasa_mortalidad = sortear_parametro(configuracion["rango_tasa_mortalidad"], generador)
 
     if dias_incubacion < 1:
         dias_incubacion = 1
@@ -27,6 +28,7 @@ def sortear_parametros(configuracion, generador):
         "p_transmision": p_transmision,
         "tasa_vacunacion": tasa_vacunacion,
         "efectividad_vacuna": efectividad_vacuna,
+        "tasa_mortalidad": tasa_mortalidad,
     }
 
 
@@ -38,7 +40,7 @@ def correr_una_simulacion(configuracion, generador, forzar_sin_vacunacion=False)
     n_poblacion = configuracion["n_poblacion"]
     dias_simulacion = configuracion["dias_simulacion"]
 
-    estado, dias_restantes, vacunado = poblacion.crear_poblacion(
+    estado, dias_restantes, vacunado, fallecido = poblacion.crear_poblacion(
         n_poblacion,
         configuracion["infectados_iniciales"],
         parametros["tasa_vacunacion"],
@@ -50,6 +52,7 @@ def correr_una_simulacion(configuracion, generador, forzar_sin_vacunacion=False)
     historial_e = []
     historial_i = []
     historial_r = []
+    historial_muertes = []
 
     for _ in range(dias_simulacion):
         susceptibles = []
@@ -75,7 +78,7 @@ def correr_una_simulacion(configuracion, generador, forzar_sin_vacunacion=False)
                         if hay_contagio:
                             nuevos_expuestos.append(indice_contacto)
 
-        progresion.avanzar_infectados(estado, dias_restantes)
+        progresion.avanzar_infectados(estado, dias_restantes, fallecido, parametros["tasa_mortalidad"], generador)
         progresion.avanzar_expuestos(estado, dias_restantes, parametros["dias_infeccioso"])
         progresion.aplicar_nuevos_expuestos(estado, dias_restantes, nuevos_expuestos, parametros["dias_incubacion"])
 
@@ -84,11 +87,14 @@ def correr_una_simulacion(configuracion, generador, forzar_sin_vacunacion=False)
         historial_e.append(conteo_e)
         historial_i.append(conteo_i)
         historial_r.append(conteo_r)
+        historial_muertes.append(poblacion.contar_fallecidos(fallecido))
 
-    return resumir_simulacion(historial_s, historial_e, historial_i, historial_r, parametros, n_poblacion)
+    return resumir_simulacion(
+        historial_s, historial_e, historial_i, historial_r, historial_muertes, parametros, n_poblacion
+    )
 
 
-def resumir_simulacion(historial_s, historial_e, historial_i, historial_r, parametros, n_poblacion):
+def resumir_simulacion(historial_s, historial_e, historial_i, historial_r, historial_muertes, parametros, n_poblacion):
     dias_simulacion = len(historial_i)
 
     dia_pico = 0
@@ -99,6 +105,8 @@ def resumir_simulacion(historial_s, historial_e, historial_i, historial_r, param
             dia_pico = dia
 
     total_infectados = n_poblacion - historial_s[dias_simulacion - 1]
+    total_muertes = historial_muertes[dias_simulacion - 1]
+    total_recuperados = historial_r[dias_simulacion - 1] - total_muertes
 
     dias_hasta_control = None
     for dia in range(dia_pico, dias_simulacion):
@@ -111,9 +119,12 @@ def resumir_simulacion(historial_s, historial_e, historial_i, historial_r, param
         "historial_e": historial_e,
         "historial_i": historial_i,
         "historial_r": historial_r,
+        "historial_muertes": historial_muertes,
         "dia_pico": dia_pico,
         "magnitud_pico": magnitud_pico,
         "total_infectados": total_infectados,
+        "total_muertes": total_muertes,
+        "total_recuperados": total_recuperados,
         "dias_hasta_control": dias_hasta_control,
         "parametros": parametros,
     }

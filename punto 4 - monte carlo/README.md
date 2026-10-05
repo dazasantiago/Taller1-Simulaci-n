@@ -13,64 +13,66 @@ streamlit run app/main.py
 ```
 
 Desde la pestaña **Configuración** se carga `configuracion_ejemplo.csv` (o uno propio
-con el mismo formato) y se guarda. En **Ejecución** se corre el estudio completo
-(dos tandas de simulaciones: sin y con vacunación). En **Resultados** y
-**Sensibilidad** aparecen las gráficas y tablas.
+con el mismo formato) y se guarda. En **Ejecución** se corre el estudio completo (dos
+tandas de simulaciones: sin y con vacunación, cada una con una semilla distinta). En
+**Resultados** y **Sensibilidad** aparecen las gráficas y tablas.
 
-## Pendiente antes de correr el estudio completo
+Para reproducir el estudio completo sin pasar por la interfaz:
 
-**No se ha corrido el estudio con 1.000 simulaciones todavía.** Hay una pregunta
-abierta para el profesor sobre la mecánica de contactos (ver más abajo); hasta que
-responda, conviene probar con pocas simulaciones (`n_simulaciones` bajo, ej. 10-20)
-para no invertir tiempo de cómputo en un supuesto que puede cambiar.
+```bash
+python correr_estudio_completo.py
+```
 
-## Decisiones de modelado que hay que poder explicar
+Guarda las figuras, la tabla de resultados y los resultados crudos en `outputs/`.
 
-- **Fórmula de contactos (⚠️ preguntar al profesor).** El enunciado dice
-  `contactos = piso(r_contactos × β)`, con `r_contactos ~ U(0,1)` y `β ∈ [0.3, 0.5]`.
-  Esa fórmula da **siempre 0** (el producto nunca llega a 1, así que `piso()` nunca
-  sube de 0), lo que congelaría la epidemia en los infectados iniciales para siempre.
-  Mientras se confirma con el profesor, `src/contagio.py::generar_numero_contactos`
-  usa una interpretación temporal: cada día, cada infectado tiene 1 contacto si
-  `r_contactos < β` (0 en caso contrario) — esto coincide con que la tabla de
-  parámetros describe β como "promedio de contactos por día". Es la única función que
-  hay que tocar si el profesor da otra fórmula.
-- **Parámetros por corrida.** β, σ⁻¹, γ⁻¹, p, tasa de vacunación y efectividad se
-  sortean una vez al inicio de cada simulación (no por individuo) y se usan iguales
-  para todos los que se expongan/infecten en esa corrida. σ⁻¹ y γ⁻¹ se redondean a
-  días enteros (mínimo 1 día).
-- **Selección del contacto.** Se arma la lista de índices susceptibles cada día y se
-  elige uno al azar de esa lista (no de toda la población), tal como pide el
-  enunciado.
-- **Efecto de la vacuna.** Si el susceptible elegido está vacunado,
-  `p_efectiva = p_base × (1 − efectividad_vacuna)`; si no, `p_efectiva = p_base`.
-- **Muertes.** El enunciado pide reportar "muertes", pero la tabla de parámetros no
-  da ninguna tasa de mortalidad y define R como "inmunes o fallecidos" sin
-  separarlos. No se inventó una tasa de letalidad: se reporta una sola categoría
-  "Removidos". Vale la pena preguntarle esto al profesor junto con lo de los
-  contactos.
-- **Análisis de sensibilidad.** Como cada una de las simulaciones sortea sus propios
-  β/p/tasa de vacunación, se separan las corridas en mitad "valor bajo" / mitad
-  "valor alto" por cada parámetro (según la mediana) y se compara el promedio de
-  infectados totales entre los dos grupos. Es el método detrás del gráfico tornado.
+## Modelo
 
-## Generador de números pseudoaleatorios: TEMPORAL
+Cada simulación sortea, una única vez, los siguientes parámetros:
 
-`src/generadores/generador_temporal.py` es un generador congruencial simple
-**hecho solo para poder probar este punto mientras el módulo de
-`punto 3 - generadores` no esté implementado** (`congruencial.py`,
-`cuadrados_medios.py` y `distribuciones.py` siguen siendo placeholders vacíos).
+| Parámetro | Distribución |
+|---|---|
+| Tasa de contacto (β) | U(3, 5) |
+| Período de incubación (σ⁻¹, días) | U(2, 5) |
+| Período infeccioso (γ⁻¹, días) | U(7, 14) |
+| Probabilidad de transmisión (p) | U(0.4, 0.6) |
+| Tasa de vacunación | U(0.3, 0.7) |
+| Efectividad de la vacuna | U(0.80, 0.95) |
+| Tasa de mortalidad | U(0.01, 0.05) |
 
-Ese archivo está en `.gitignore` (no se sube al repositorio) porque es un parche
-temporal, no parte del entregable. **Cuando el equipo termine el módulo de
-generadores del Punto 3:**
+σ⁻¹ y γ⁻¹ se redondean a días enteros (mínimo 1) y se aplican por igual a todos los
+individuos que se expongan/infecten en esa corrida.
 
-1. Borrar `src/generadores/generador_temporal.py`.
-2. Reemplazar los `import` de `generador_temporal` en `app/tab_ejecucion.py` (y
-   cualquier script nuevo que lo use) por `generar_uniforme` de
-   `punto 3 - generadores/src/generadores/distribuciones.py`.
-3. Documentar en el informe qué método de generación (Cuadrados Medios,
-   Congruencial, etc.) se usó, como pide el enunciado.
+Mecánica diaria:
+
+1. Cada infectado genera `r ~ U(0,1)` y obtiene `piso(r × β)` contactos ese día.
+2. Cada contacto elige un susceptible al azar de la lista de susceptibles vigentes.
+3. La probabilidad de transmisión es `p` si el susceptible no está vacunado, o
+   `p × (1 − efectividad_vacuna)` si lo está.
+4. Los expuestos pasan a infectados tras el período de incubación; los infectados
+   pasan a removidos tras el período infeccioso, sorteando en ese momento si el
+   individuo fallece (con probabilidad igual a la tasa de mortalidad) o se recupera.
+
+El análisis de sensibilidad separa las corridas de un estudio en dos grupos por cada
+parámetro (por encima/por debajo de la mediana de ese parámetro) y compara el
+promedio de la métrica elegida (total de infectados o total de muertes) entre ambos
+grupos; la diferencia es la barra del gráfico de tornado.
+
+## Generación de números pseudoaleatorios
+
+`src/generador_adaptador.py` (`GeneradorMonteCarlo`) conecta el modelo directamente
+con el generador congruencial lineal de `punto 3 - generadores/src/generadores/congruencial.py`:
+genera los enteros en lotes (5.000 a la vez), los normaliza a [0, 1) con
+`uniforme_desde_enteros` y entrega un valor a la vez a través de
+`siguiente_uniforme()`. Cada simulación del estudio se instancia con su propia
+semilla (`semilla_base + i`), por lo que las 1.000 corridas de cada escenario son
+independientes entre sí.
+
+## Resultados del estudio completo
+
+Estudio de 1.000 simulaciones por escenario (sin y con vacunación), población
+completa (10.000, 365 días), generador conectado a Punto 3. Resultados y gráficas en
+`outputs/`; el informe completo con la interpretación está en
+`Informe_Punto4_EpiSim.docx`.
 
 ## Estructura
 
@@ -83,24 +85,30 @@ app/
   tab_resultados.py     curva epidémica, histogramas, comparación, tabla
   tab_sensibilidad.py   gráfico tornado y tabla de sensibilidad
 src/
-  generadores/generador_temporal.py   TEMPORAL, ver sección de arriba
+  generador_adaptador.py   conecta con el generador real de Punto 3
   configuracion.py      parámetros por defecto y carga desde CSV
   poblacion.py          estados S/E/I/R y creación de la población
   contagio.py           número de contactos, elegir susceptible, evaluar transmisión
-  progresion.py         E→I, I→R por conteo de días
+  progresion.py         E→I, I→R por conteo de días, con sorteo de mortalidad
   simulacion.py         una simulación completa (365 días)
   estudio.py            muchas simulaciones, bandas de confianza, sensibilidad
-  graficas.py           las 7 funciones de gráficos (todas devuelven una Figure)
+  graficas.py           las 9 funciones de gráficos (todas devuelven una Figure)
+correr_estudio_completo.py   script para reproducir el estudio completo sin la UI
 configuracion_ejemplo.csv
 ```
 
 ## Estado actual
 
-- [x] Mecánica de contagio día a día (contactos, transmisión, vacunación).
+- [x] Mecánica de contagio día a día (contactos, transmisión, vacunación, mortalidad).
 - [x] Motor de una simulación completa y de un estudio de N simulaciones.
-- [x] 7 gráficas (curva epidémica, 4 histogramas, comparación de escenarios, tornado)
-      y tabla de estadísticas descriptivas.
+- [x] 9 gráficas (curva epidémica, 5 histogramas, comparación de escenarios, 2 tornado)
+      y tabla de estadísticas descriptivas (incluye muertes).
 - [x] Interfaz Streamlit con las 4 pestañas.
-- [ ] Confirmar con el profesor la fórmula de contactos y el tratamiento de muertes.
-- [ ] Correr el estudio completo de 1.000 simulaciones (queda pendiente a propósito).
-- [ ] Conectar con los generadores reales del Punto 3 cuando estén implementados.
+- [x] Conectado al generador real de Punto 3 (`generador_adaptador.py`).
+- [x] Estudio completo de 1.000 simulaciones corrido (ver `outputs/`).
+
+## Nota sobre el uso de herramientas de inteligencia artificial
+
+Claude (Anthropic) ayudó en el desarrollo de la interfaz Streamlit de este punto
+(las 4 pestañas y el manejo de sesión) y en
+parte de la documentación técnica (este README).

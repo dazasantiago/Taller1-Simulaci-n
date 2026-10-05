@@ -6,12 +6,13 @@ INFECTADOS_INICIALES = 10
 DIAS_SIMULACION = 365
 N_SIMULACIONES = 1000
 
-RANGO_BETA = (0.3, 0.5)
+RANGO_BETA = (3, 5)
 RANGO_SIGMA = (2, 5)
 RANGO_GAMMA = (7, 14)
 RANGO_P_TRANSMISION = (0.4, 0.6)
 RANGO_TASA_VACUNACION = (0.3, 0.7)
 RANGO_EFECTIVIDAD_VACUNA = (0.80, 0.95)
+RANGO_TASA_MORTALIDAD = (0.01, 0.05)
 
 
 def parametros_por_defecto():
@@ -26,6 +27,7 @@ def parametros_por_defecto():
         "rango_p_transmision": RANGO_P_TRANSMISION,
         "rango_tasa_vacunacion": RANGO_TASA_VACUNACION,
         "rango_efectividad_vacuna": RANGO_EFECTIVIDAD_VACUNA,
+        "rango_tasa_mortalidad": RANGO_TASA_MORTALIDAD,
     }
 
 
@@ -52,6 +54,7 @@ def leer_configuracion_texto(texto):
     parametros["rango_p_transmision"] = leer_rango(filas_por_nombre, "p_transmision", parametros["rango_p_transmision"])
     parametros["rango_tasa_vacunacion"] = leer_rango(filas_por_nombre, "tasa_vacunacion", parametros["rango_tasa_vacunacion"])
     parametros["rango_efectividad_vacuna"] = leer_rango(filas_por_nombre, "efectividad_vacuna", parametros["rango_efectividad_vacuna"])
+    parametros["rango_tasa_mortalidad"] = leer_rango(filas_por_nombre, "tasa_mortalidad", parametros["rango_tasa_mortalidad"])
 
     return parametros
 

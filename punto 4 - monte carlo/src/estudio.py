@@ -1,4 +1,5 @@
 from src import simulacion
+from src.generador_adaptador import GeneradorMonteCarlo
 
 NOMBRES_PARAMETROS_SENSIBILIDAD = (
     "beta",
@@ -6,13 +7,17 @@ NOMBRES_PARAMETROS_SENSIBILIDAD = (
     "tasa_vacunacion",
     "dias_incubacion",
     "dias_infeccioso",
+    "tasa_mortalidad",
 )
 
 
-def correr_estudio(configuracion, generador, n_simulaciones, forzar_sin_vacunacion=False):
+def correr_estudio(configuracion, semilla_base, n_simulaciones, forzar_sin_vacunacion=False):
     resultados = []
-    for _ in range(n_simulaciones):
-        resultado = simulacion.correr_una_simulacion(configuracion, generador, forzar_sin_vacunacion)
+    for i in range(n_simulaciones):
+        generador = GeneradorMonteCarlo(semilla_base + i)
+        resultado = simulacion.correr_una_simulacion(
+            configuracion, generador.siguiente_uniforme, forzar_sin_vacunacion
+        )
         resultados.append(resultado)
     return resultados
 
@@ -53,10 +58,12 @@ def calcular_curva_promedio(resultados, campo):
 
 def calcular_estadisticas_escenario(resultados):
     totales_infectados = []
+    totales_muertes = []
     dias_pico = []
     magnitudes_pico = []
     for resultado in resultados:
         totales_infectados.append(resultado["total_infectados"])
+        totales_muertes.append(resultado["total_muertes"])
         dias_pico.append(resultado["dia_pico"])
         magnitudes_pico.append(resultado["magnitud_pico"])
 
@@ -64,6 +71,9 @@ def calcular_estadisticas_escenario(resultados):
         "total_infectados_promedio": promedio(totales_infectados),
         "total_infectados_minimo": min(totales_infectados),
         "total_infectados_maximo": max(totales_infectados),
+        "total_muertes_promedio": promedio(totales_muertes),
+        "total_muertes_minimo": min(totales_muertes),
+        "total_muertes_maximo": max(totales_muertes),
         "dia_pico_promedio": promedio(dias_pico),
         "magnitud_pico_promedio": promedio(magnitudes_pico),
     }
@@ -77,7 +87,7 @@ def dias_hasta_control_validos(resultados):
     return valores
 
 
-def analizar_sensibilidad(resultados):
+def analizar_sensibilidad(resultados, campo_objetivo="total_infectados"):
     filas = []
     for nombre in NOMBRES_PARAMETROS_SENSIBILIDAD:
         valores_parametro = []
@@ -91,9 +101,9 @@ def analizar_sensibilidad(resultados):
         grupo_alto = []
         for resultado in resultados:
             if resultado["parametros"][nombre] <= mediana:
-                grupo_bajo.append(resultado["total_infectados"])
+                grupo_bajo.append(resultado[campo_objetivo])
             else:
-                grupo_alto.append(resultado["total_infectados"])
+                grupo_alto.append(resultado[campo_objetivo])
 
         if len(grupo_bajo) > 0:
             promedio_bajo = promedio(grupo_bajo)

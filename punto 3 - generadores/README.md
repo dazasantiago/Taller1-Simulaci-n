@@ -1,4 +1,4 @@
-# Taller 1 - Simulación: Generadores y Validación de Números Pseudoaleatorios
+﻿# Taller 1 - Simulación: Generadores y Validación de Números Pseudoaleatorios
 
 Biblioteca en Python para generar números pseudoaleatorios **implementados
 desde cero** (sin usar `random`, `numpy.random` ni ninguna librería de
@@ -292,3 +292,9 @@ Cosas a tener en cuenta al usar:
 - La semilla determina completamente la secuencia — misma semilla, mismos números siempre. Para comparar dos generadores usar la misma semilla.
 - Aumentar la cantidad de números generados hace que el histograma converja más rápido a la distribución uniforme teórica (Ley de los Grandes Números).
 - Las pruebas estadísticas reciben `list[float]` con valores en `[0, 1)`, no los enteros del generador. Siempre pasar primero por `distribuciones.py`.
+## Nota sobre el uso de herramientas de inteligencia artificial
+
+Claude (Anthropic) ayudó a reescribir las pruebas de validación de Chi-cuadrado,
+Póker y Rachas (`src/validacion/prueba_chi_cuadrado.py`, `prueba_poker.py`,
+`prueba_rachas.py`) en una versión más lineal y sin dependencias avanzadas de
+Python, bajo dirección del estudiante en cada decisión de diseño.

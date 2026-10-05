@@ -18,6 +18,10 @@ def crear_poblacion(n_poblacion, infectados_iniciales, tasa_vacunacion, dias_inf
         r = generador()
         vacunado.append(r < tasa_vacunacion)
 
+    fallecido = []
+    for _ in range(n_poblacion):
+        fallecido.append(False)
+
     infectados_asignados = 0
     while infectados_asignados < infectados_iniciales:
         r = generador()
@@ -29,7 +33,7 @@ def crear_poblacion(n_poblacion, infectados_iniciales, tasa_vacunacion, dias_inf
             dias_restantes[indice] = dias_infeccioso
             infectados_asignados += 1
 
-    return estado, dias_restantes, vacunado
+    return estado, dias_restantes, vacunado, fallecido
 
 
 def contar_estados(estado):
@@ -47,3 +51,11 @@ def contar_estados(estado):
         else:
             conteo_r += 1
     return conteo_s, conteo_e, conteo_i, conteo_r
+
+
+def contar_fallecidos(fallecido):
+    conteo = 0
+    for valor in fallecido:
+        if valor:
+            conteo += 1
+    return conteo
