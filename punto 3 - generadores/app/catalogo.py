@@ -75,9 +75,9 @@ BASES = (
         "LIN",
         "src.generadores.congruencial",
         (
-            Campo("a", "Multiplicador (a)", 1664525, 1),
-            Campo("c", "Incremento (c)", 1013904223, 0),
-            Campo("m", "Módulo (m)", 2**32, 2),
+            Campo("a", "Multiplicador (a)", 1103515245, 1),
+            Campo("c", "Incremento (c)", 12345, 0),
+            Campo("m", "Módulo (m)", 2**31, 2),  # ANSI C standard (ISO/IEC 9899:1990)
         ),
     ),
     Base(
@@ -86,8 +86,8 @@ BASES = (
         "MUL",
         "src.generadores.congruencial",
         (
-            Campo("a", "Multiplicador (a)", 16807, 1),
-            Campo("m", "Módulo (m)", 2**31 - 1, 2),
+            Campo("a", "Multiplicador (a)", 48271, 1),
+            Campo("m", "Módulo (m)", 2**31 - 1, 2),  # L'Ecuyer (1988), CACM
         ),
     ),
     Base(

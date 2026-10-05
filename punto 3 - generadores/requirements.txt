@@ -1,4 +1,4 @@
-# Dependencias fijadas por versión.
+﻿# Dependencias fijadas por versión.
 #
 # IMPORTANTE (requisito de la materia):
 #   - numpy   -> SOLO para manejo de arreglos (NUNCA numpy.random para generar números).

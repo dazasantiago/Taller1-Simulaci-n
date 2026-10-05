@@ -231,3 +231,64 @@ Taller1/
 - `docs/README.md`: contrato de cada función (firma, parámetros, tipo
   de retorno) y convenciones a respetar para que el módulo sea
   reutilizable por los próximos proyectos.
+
+
+## Punto 3 — Generadores Congruenciales
+
+### Qué pide y por qué
+
+El punto 3 exige construir generadores de números pseudoaleatorios desde cero — sin `random`, `numpy.random` ni ninguna librería de aleatoriedad. La razón es demostrar que se entiende el algoritmo, no solo que se sabe llamar una función. Los métodos congruenciales son los más usados en simulación clásica precisamente porque su mecánica es explícita y analizable.
+
+### Cómo funciona el flujo completo
+
+```
+semilla (X_0)
+    ↓
+congruencial.py  →  X_i  (enteros en [0, m))
+    ↓
+distribuciones.py  →  R_i = X_i / m  (uniformes en [0.0, 1.0))
+    ↓
+distribuciones.py  →  N_i  (normales vía Box-Muller, si se necesitan)
+    ↓
+pruebas estadísticas  (reciben list[float] de R_i)
+```
+
+### Generador Congruencial Lineal (LCG)
+
+Recurrencia: `X_{n+1} = (a * X_n + c) mod m`
+
+Genera enteros `X_i` en `[0, m)`. La semilla `X_0` debe estar en `[0, m-1]`.
+
+Parámetros usados — ANSI C (ISO/IEC 9899:1990): `a = 1103515245`, `c = 12345`, `m = 2**31`.
+Con estos tres valores se cumple el **Teorema de Dobell**, que garantiza período completo igual a `m`: `mcd(c, m) = 1`, `a-1` divisible por todos los factores primos de `m`, y `a-1` divisible por 4 porque `m` es divisible por 4.
+
+Restricciones que valida el código:
+- `m > 1`
+- `a` en `[1, m-1]`
+- `c` en `[0, m-1]`
+- `seed` en `[0, m-1]`
+
+### Generador Congruencial Multiplicativo (MCG)
+
+Recurrencia: `X_{n+1} = (a * X_n) mod m`  — caso especial del LCG con `c = 0`.
+
+Con `c = 0` el período nunca puede ser completo (Dobell no aplica), pero si `m` es primo y `a` es raíz primitiva módulo `m`, el período es `m - 1`, que es el máximo posible.
+
+Parámetros usados — L'Ecuyer (1988), CACM: `a = 48271`, `m = 2**31 - 1`.
+`m = 2147483647` es primo de Mersenne (2³¹ − 1). L'Ecuyer demostró que `a = 48271` tiene mejores propiedades espectrales que el `a = 16807` original de Park & Miller (1988).
+
+Restricciones que valida el código:
+- `m > 1`
+- `a >= 1`
+- `seed > 0`
+- `seed` no múltiplo de `m` (produciría secuencia degenerada de ceros)
+
+### Qué generan y qué tener en cuenta
+
+Ambas funciones retornan `list[int]` — enteros crudos en `[0, m)`, **no** valores en `[0, 1)`. La normalización `R_i = X_i / m` la hace `distribuciones.py`, no el generador. Esto permite reutilizar los enteros en otros contextos sin forzar normalización.
+
+Cosas a tener en cuenta al usar:
+- Con parámetros distintos a los de referencia el período puede ser mucho menor que `m` y el histograma se verá no uniforme aunque el código sea correcto.
+- La semilla determina completamente la secuencia — misma semilla, mismos números siempre. Para comparar dos generadores usar la misma semilla.
+- Aumentar la cantidad de números generados hace que el histograma converja más rápido a la distribución uniforme teórica (Ley de los Grandes Números).
+- Las pruebas estadísticas reciben `list[float]` con valores en `[0, 1)`, no los enteros del generador. Siempre pasar primero por `distribuciones.py`.
