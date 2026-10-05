@@ -52,6 +52,8 @@ import os
 import sys
 import time
 
+import resource
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -604,7 +606,8 @@ def main(argv=None):
     t = time.perf_counter() - t0
 
     resumir(finales_x, finales_y, finales_z, args.n_pasos, vis_despues)
-    print(f"Tiempo: {t:.2f} s")
+    mem_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
+    print(f"Tiempo: {t:.2f} s | Memoria pico: {mem_mb:.0f} MB")
 
     graficar_scatter_3d(finales_x, finales_y, finales_z, args.n_pasos,
                         os.path.join(args.salida, "scatter_3d.png"))

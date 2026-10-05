@@ -58,6 +58,7 @@ import math
 import os
 import sys
 import time
+import resource
 
 import matplotlib
 matplotlib.use("Agg")
@@ -578,6 +579,8 @@ def main(argv=None):
         semillas, args.n_pasos, args.n_lote, tipo=args.generador
     )
     t = time.perf_counter() - t0
+    mem_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
+    print(f"Tiempo: {t:.2f} s | Memoria pico: {mem_mb:.0f} MB")
 
     resumir(finales, args.n_pasos)
     if len(pos_m):
