@@ -406,7 +406,7 @@ def validar_conjunto(semilla=12345, cantidad=10000, tipo="multiplicativo"):
           f"-> {'PASA' if pasa else 'FALLA'}")
 
     # 5. Póker
-    r = poker_test(u_lista, hand_size=5)
+    r = poker_test(u_lista)
     pasa = _extraer_pasa(r)
     resultados["poker"] = pasa
     print(f"5. Póker:      stat={r.get('statistic', 0):.4f}  "
@@ -579,7 +579,7 @@ def main(argv=None):
     )
     t = time.perf_counter() - t0
 
-        resumir(finales, args.n_pasos)
+    resumir(finales, args.n_pasos)
     if len(pos_m):
         print(f"Retorno exacto en paso 1000: {np.mean(pos_m == 0):.4f} (teórico 0.0252)")
         print(f"Paso por el origen en ≤1000: {vis_m.mean():.4f} (teórico 0.9748)")
