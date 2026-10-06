@@ -46,13 +46,12 @@ def linear_congruential(
     result = []
     x = seed
     for _ in range(count):
-        x = (a * x + c) % m   # recurrencia lineal
+        x = (a * x + c) % m 
         result.append(x)
 
     return result
 
 
-# Alias que espera app/catalogo.py
 congruencial_lineal = linear_congruential
 
 
@@ -97,11 +96,9 @@ def multiplicative_congruential(
     result = []
     x = seed
     for _ in range(count):
-        x = (a * x) % m   # recurrencia multiplicativa
+        x = (a * x) % m
         result.append(x)
 
     return result
 
-
-# Alias que espera app/catalogo.py
 congruencial_multiplicativo = multiplicative_congruential
