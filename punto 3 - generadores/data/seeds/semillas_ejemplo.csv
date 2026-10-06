@@ -1,6 +1,11 @@
-id,semilla,n_digitos,a,c,m,descripcion
-1,5735,4,,,,Semilla de ejemplo para Cuadrados Medios
-2,1234,4,1093,18257,86436,Semilla de ejemplo para Congruencial Lineal
-3,9876,4,7,,2147483647,Semilla de ejemplo para Congruencial Multiplicativo
-4,4321,,,,,"Semilla 1/2 de ejemplo para Congruencial Aditivo (usar junto a fila 5)"
-5,7919,,,,,"Semilla 2/2 de ejemplo para Congruencial Aditivo (usar junto a fila 4)"
+semilla
+12345
+67890
+11111
+99991
+54321
+13579
+24680
+77777
+31415
+98765
